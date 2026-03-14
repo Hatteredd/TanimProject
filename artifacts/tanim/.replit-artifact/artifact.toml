@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Tanim - Agricultural Supply Chain"
+version = "1.0.0"
+id = "artifacts/tanim"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+localPort = 21825
+name = "web"
+paths = ["/"]
+
+[services.development]
+run = "pnpm --filter @workspace/tanim run dev"
+
+[services.env]
+PORT = "21825"
+BASE_PATH = "/"
+
+[services.production]
+build = ["pnpm", "--filter", "@workspace/tanim", "run", "build"]
+publicDir = "artifacts/tanim/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"

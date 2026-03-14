@@ -1,0 +1,19 @@
+packages:
+  "recharts": "For the Admin and Farmer dashboard charts"
+  "framer-motion": "For page transitions and micro-interactions"
+  "@hookform/resolvers": "For Zod form validation"
+  "react-hook-form": "For robust form state management"
+  "date-fns": "For formatting dates in orders and reviews"
+
+images:
+  - path: "artifacts/tanim/public/images/hero-bg.png"
+    description: "Lush, sunlit agricultural field with neat crop rows stretching to the horizon, vibrant greens, highly cinematic, premium lighting"
+    aspect_ratio: "16:9"
+  - path: "artifacts/tanim/public/images/logo.png"
+    description: "Minimalist geometric leaf logo for an agriculture tech company, deep green, transparent background, modern and clean"
+    aspect_ratio: "1:1"
+
+notes:
+  - Using generated API hooks from @workspace/api-client-react
+  - wouter for routing
+  - Forms use react-hook-form with Zod validation
