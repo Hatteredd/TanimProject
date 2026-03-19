@@ -23,14 +23,7 @@ use App\Http\Controllers\Admin\LogController;
 use App\Http\Controllers\Admin\DataController;
 
 // ── Public ──────────────────────────────────────────────────────────
-Route::get('/', function () {
-    $featured = \App\Models\Product::where('is_active', true)
-        ->where('stock', '>', 0)
-        ->latest()
-        ->limit(8)
-        ->get();
-    return view('home', compact('featured'));
-})->name('home');
+Route::get('/', [ProductController::class, 'home'])->name('home');
 
 Route::get('/marketplace',        [ProductController::class, 'index'])->name('marketplace');
 Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
@@ -102,9 +95,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/products',                     [ProductAdminController::class, 'index'])->name('products.index');
     Route::get('/products/create',              [ProductAdminController::class, 'create'])->name('products.create');
     Route::post('/products',                    [ProductAdminController::class, 'store'])->name('products.store');
+    Route::post('/products/import',             [ProductAdminController::class, 'import'])->name('products.import');
     Route::get('/products/{product}/edit',      [ProductAdminController::class, 'edit'])->name('products.edit');
     Route::put('/products/{product}',           [ProductAdminController::class, 'update'])->name('products.update');
     Route::delete('/products/{product}',        [ProductAdminController::class, 'destroy'])->name('products.destroy');
+    Route::delete('/products/{product}/photos/{photo}', [ProductAdminController::class, 'destroyPhoto'])->name('products.photos.destroy');
     Route::post('/products/{id}/restore',       [ProductAdminController::class, 'restore'])->name('products.restore');
     Route::delete('/products/{id}/force',       [ProductAdminController::class, 'forceDelete'])->name('products.force-delete');
 

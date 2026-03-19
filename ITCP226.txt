@@ -1,0 +1,74 @@
+ITCP226 Computer Programming 5 - Web Development
+
+MP1 Product/Service  20pts
+
+Product/Service CRUD datatable 8pts
+Product/Service CRUDRestore datatable upload a single photo 10pts
+Product/Service CRUDRestore datatable upload/view  multiple photos 15pts
+Product/Service CRUDRestore datatable upload/view  multiple photos, import products on excel worksheet. 20pts
+
+mp2 User CRUD 20pts
+   User Registration with upload photo 5pts
+   User update profile and upload photo. 5pts
+   list users on a datatable. 5pts
+   admin can set the status of a user to active/inactive. update role of user. 5pts
+
+mp3 20pts
+   authentication. send an email verification after registration. only verified users can login. admin routes should be protected from unauthenticated and unauthorized (not admin role) users. 20pts
+
+mp4 Product review CRUD 20pts
+   customers that bought a product or service can post a review/comment and rating on that service or product. 8pts
+   customers that bought a product or service can post and update a review/comment and rating on that service or product. 10pts
+   list all reviews on a datatable. 5pts
+   the administrator can delete user reviews. 5pts
+
+mp5 validation 15pts
+   form validation add/edit product/service. user registration validation 15pts 
+
+mp6 filter 15pts 
+   * apply filter when a search for a service or product is made.
+   product/services filter by price 10pts
+   product/services filter by price and category/brand/type 15pts
+
+mp7 charts 15pts
+   charts yearly sales 8pts
+   sales bar chart with date range (date picker).
+    A pie chart showing the percentage of total sales contributed by each product. 15pts
+
+mp8 search 15pts
+   search products on home page(no datatable search). use LIKE query 8pts
+   search products on home page(no datatable search). use model search 10pts
+   search products on home page(no datatable search). use laravel scout with result pagination 15pts
+
+
+
+term test lab 30pts
+   transaction. an email will be sent after a transaction has been completed. 10pts
+ 
+   administrator can update the status of the transaction. 5pts
+   send an email after the update 5pts
+
+   attach on the email the receipt in pdf format. the receipt contains the customer and order details. 10pts
+
+
+quiz 4 user interface design 15pts
+
+u1 database design/migration 20pts 
+   design should be at least 2nd normal form. 10pts
+   create the database using migration scripts 5pts
+   database seeding. seed all database tables 5pts
+
+u2 functional requirements completeness app complexity, added features. 10pts 
+   program execution (errors), 10pts
+   project contribution 10pts
+
+Term Test Lec. written 
+
+full credit will be given if you answer correctly. 
+a deduction of two points will be applied on all machine problems for each unexcused absence.
+be on time.
+if you have a term test on other subjects that coincide with the time of the project presentation, take the exam first then come back later for the presentation.
+
+
+
+

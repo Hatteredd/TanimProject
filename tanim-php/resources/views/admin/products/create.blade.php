@@ -21,6 +21,14 @@
                     </select>
                 </div>
                 <div>
+                    <label class="label">Brand</label>
+                    <input name="brand" type="text" class="input" value="{{ old('brand') }}" placeholder="e.g. Tanim Fresh" />
+                </div>
+                <div>
+                    <label class="label">Type</label>
+                    <input name="type" type="text" class="input" value="{{ old('type') }}" placeholder="e.g. Organic" />
+                </div>
+                <div>
                     <label class="label">Unit</label>
                     <select name="unit" class="input" required>
                         @foreach(['kg','g','piece','bundle','liter','dozen','sack','box'] as $u)
@@ -52,6 +60,11 @@
             <div>
                 <label class="label">Product Image</label>
                 <input name="image" type="file" class="input" accept="image/*" style="padding:.5rem;" />
+            </div>
+            <div>
+                <label class="label">Gallery Photos <span style="font-weight:400;color:var(--text-light);">(optional, up to 10)</span></label>
+                <input name="photos[]" type="file" class="input" accept="image/*" multiple style="padding:.5rem;" />
+                <p style="margin:.35rem 0 0;font-size:.72rem;color:var(--text-light);">These photos are shown in the product detail gallery.</p>
             </div>
             <div style="display:flex;align-items:center;gap:.6rem;">
                 <input type="checkbox" name="is_active" value="1" id="is_active" {{ old('is_active','1')?'checked':'' }} style="width:1rem;height:1rem;accent-color:var(--primary);" />

@@ -21,27 +21,51 @@
         <button type="submit" class="btn-primary" style="padding:.6rem 1.1rem;font-size:.85rem;border-radius:.75rem;">Filter</button>
         @if(request()->hasAny(['search','category','status']))<a href="{{ route('admin.products.index') }}" style="padding:.6rem .9rem;background:var(--bg);color:var(--text-muted);font-size:.85rem;border:1px solid var(--border);border-radius:.75rem;text-decoration:none;">✕</a>@endif
     </form>
-    <a href="{{ route('admin.products.create') }}" class="btn-primary" style="padding:.6rem 1.25rem;font-size:.85rem;border-radius:.75rem;white-space:nowrap;">+ Add Product</a>
+    <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;">
+        <form method="POST" action="{{ route('admin.products.import') }}" enctype="multipart/form-data" style="display:flex;gap:.45rem;align-items:center;">
+            @csrf
+            <input type="file" name="file" accept=".xlsx,.xls,.csv" class="input" style="width:200px;padding:.45rem;font-size:.75rem;" required />
+            <button type="submit" style="padding:.6rem .9rem;background:var(--bg);color:var(--text);font-size:.78rem;font-weight:700;border:1px solid var(--border);border-radius:.75rem;cursor:pointer;">Import Excel</button>
+        </form>
+        <a href="{{ route('admin.products.create') }}" class="btn-primary" style="padding:.6rem 1.25rem;font-size:.85rem;border-radius:.75rem;white-space:nowrap;">+ Add Product</a>
+    </div>
+</div>
+
+<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem;margin:-.35rem 0 .8rem;">
+    <p style="margin:0;font-size:.75rem;color:var(--text-light);">Worksheet headings: <strong>name, category, description, price, unit, stock, farm_location, harvest_date, brand, type</strong></p>
+    <p style="margin:0;font-size:.75rem;color:var(--text-light);">Total rows: <span id="datatable-count">{{ $products->count() }}</span></p>
 </div>
 
 <div class="glass" style="border-radius:1.25rem;overflow:hidden;">
-    <table style="width:100%;border-collapse:collapse;">
+    <table id="products-table" style="width:100%;border-collapse:collapse;">
         <thead>
             <tr style="background:var(--bg);border-bottom:1px solid var(--border);">
-                <th class="th-cell" style="text-align:left;">Product</th>
-                <th class="th-cell" style="text-align:right;">Price</th>
-                <th class="th-cell" style="text-align:center;">Stock</th>
-                <th class="th-cell" style="text-align:center;">Status</th>
+                <th class="th-cell" data-sort="name" style="text-align:left;cursor:pointer;">Product</th>
+                <th class="th-cell" data-sort="price" style="text-align:right;cursor:pointer;">Price</th>
+                <th class="th-cell" data-sort="stock" style="text-align:center;cursor:pointer;">Stock</th>
+                <th class="th-cell" data-sort="status" style="text-align:center;cursor:pointer;">Status</th>
                 <th class="th-cell" style="text-align:center;">Actions</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody id="products-table-body">
             @forelse($products as $product)
-            <tr style="border-bottom:1px solid var(--border);{{ $product->trashed() ? 'opacity:.55;' : '' }}" class="tr-hover">
+            <tr
+                style="border-bottom:1px solid var(--border);{{ $product->trashed() ? 'opacity:.55;' : '' }}"
+                class="tr-hover"
+                data-name="{{ strtolower($product->name) }}"
+                data-price="{{ (float) $product->price }}"
+                data-stock="{{ (int) $product->stock }}"
+                data-status="{{ $product->trashed() ? 'deleted' : ($product->is_active ? 'active' : 'inactive') }}"
+            >
                 <td class="td-cell">
-                    <div>
+                    <div style="display:flex;align-items:center;gap:.6rem;">
+                        @if($product->primaryPhoto())
+                        <img src="{{ $product->primaryPhoto() }}" alt="{{ $product->name }}" style="width:2.2rem;height:2.2rem;border-radius:.45rem;object-fit:cover;border:1px solid var(--border);" />
+                        @endif
+                        <div>
                         <p style="font-size:.85rem;font-weight:700;color:var(--text);margin:0;">{{ $product->name }}</p>
-                        <p style="font-size:.72rem;color:var(--text-muted);margin:0;">{{ $product->category }}</p>
+                        <p style="font-size:.72rem;color:var(--text-muted);margin:0;">{{ $product->category }} @if($product->photos->count()) · {{ $product->photos->count() }} photo{{ $product->photos->count() > 1 ? 's' : '' }} @endif</p>
+                        </div>
                     </div>
                 </td>
                 <td class="td-cell" style="text-align:right;font-size:.85rem;font-weight:700;color:var(--primary);">₱{{ number_format($product->price,2) }}</td>
@@ -84,5 +108,45 @@
         </tbody>
     </table>
 </div>
-<div style="margin-top:1.25rem;">{{ $products->links() }}</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const body = document.getElementById('products-table-body');
+    if (!body) return;
+
+    const headers = document.querySelectorAll('#products-table th[data-sort]');
+    let currentSort = { key: 'name', direction: 'asc' };
+
+    function sortRows(key, direction) {
+        const rows = Array.from(body.querySelectorAll('tr[data-name]'));
+        rows.sort((a, b) => {
+            const av = a.dataset[key] ?? '';
+            const bv = b.dataset[key] ?? '';
+
+            if (key === 'price' || key === 'stock') {
+                return direction === 'asc' ? Number(av) - Number(bv) : Number(bv) - Number(av);
+            }
+
+            return direction === 'asc'
+                ? String(av).localeCompare(String(bv))
+                : String(bv).localeCompare(String(av));
+        });
+
+        rows.forEach((row) => body.appendChild(row));
+        const countEl = document.getElementById('datatable-count');
+        if (countEl) countEl.textContent = rows.length;
+    }
+
+    headers.forEach((header) => {
+        header.addEventListener('click', function () {
+            const key = this.dataset.sort;
+            const direction = currentSort.key === key && currentSort.direction === 'asc' ? 'desc' : 'asc';
+            currentSort = { key, direction };
+            sortRows(key, direction);
+        });
+    });
+
+    sortRows('name', 'asc');
+});
+</script>
 @endsection

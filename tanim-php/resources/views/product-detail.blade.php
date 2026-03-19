@@ -52,6 +52,29 @@
     z-index: 2;
 }
 
+.pd-thumb-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(68px, 1fr));
+    gap: 0.55rem;
+    margin-top: 0.85rem;
+}
+
+.pd-thumb {
+    width: 100%;
+    height: 68px;
+    border-radius: 0.65rem;
+    object-fit: cover;
+    border: 2px solid var(--border);
+    cursor: pointer;
+    transition: border-color .15s, transform .15s;
+    background: var(--bg);
+}
+
+.pd-thumb.active {
+    border-color: var(--primary);
+    transform: translateY(-1px);
+}
+
 /* Info panel */
 .pd-info-card {
     background: var(--bg-glass);
@@ -277,10 +300,14 @@
 
         {{-- Image --}}
         <div style="position:relative;">
+            @php
+                $galleryPhotos = $product->photos;
+                $mainPhoto = $galleryPhotos->firstWhere('is_primary', true) ?? $galleryPhotos->first();
+            @endphp
             <div class="pd-image">
                 @php $icons = ['Vegetables'=>'🥦','Fruits'=>'🍓','Grains & Rice'=>'🌾','Root Crops'=>'🥔','Herbs & Spices'=>'🌿']; @endphp
-                @if($product->primaryPhoto())
-                    <img src="{{ $product->primaryPhoto() }}" alt="{{ $product->name }}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;z-index:0;" />
+                @if($mainPhoto || $product->primaryPhoto())
+                    <img id="main-product-image" src="{{ $mainPhoto ? asset('storage/'.$mainPhoto->path) : $product->primaryPhoto() }}" alt="{{ $product->name }}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;z-index:0;" />
                 @else
                     {{ $icons[$product->category] ?? '🛒' }}
                 @endif
@@ -288,6 +315,20 @@
                     <span class="badge">{{ $product->category }}</span>
                 </div>
             </div>
+
+            @if($galleryPhotos->isNotEmpty())
+            <div class="pd-thumb-grid">
+                @foreach($galleryPhotos as $photo)
+                <img
+                    src="{{ asset('storage/'.$photo->path) }}"
+                    alt="{{ $product->name }} photo {{ $loop->iteration }}"
+                    class="pd-thumb {{ ($mainPhoto && $mainPhoto->id === $photo->id) ? 'active' : '' }}"
+                    data-photo-src="{{ asset('storage/'.$photo->path) }}"
+                />
+                @endforeach
+            </div>
+            @endif
+
             {{-- Stock status --}}
             <div style="margin-top:1rem;text-align:center;">
                 @if($product->stock <= 0)
@@ -593,6 +634,17 @@ document.querySelectorAll('.star-label').forEach(star => {
         this.closest('form').querySelectorAll('.star-label').forEach((s, i) => {
             s.style.color = i < val ? '#f59e0b' : 'var(--border)';
         });
+    });
+});
+
+document.querySelectorAll('.pd-thumb').forEach((thumb) => {
+    thumb.addEventListener('click', function () {
+        const target = document.getElementById('main-product-image');
+        if (!target) return;
+
+        target.src = this.dataset.photoSrc;
+        document.querySelectorAll('.pd-thumb').forEach((el) => el.classList.remove('active'));
+        this.classList.add('active');
     });
 });
 </script>

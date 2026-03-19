@@ -58,6 +58,32 @@
             </select>
         </div>
         <div style="min-width:160px;">
+            <label class="label">Brand</label>
+            <select name="brand" class="input">
+                <option value="">All Brands</option>
+                @foreach($brands as $brand)
+                <option value="{{ $brand }}" {{ request('brand') == $brand ? 'selected' : '' }}>{{ $brand }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div style="min-width:160px;">
+            <label class="label">Type</label>
+            <select name="type" class="input">
+                <option value="">All Types</option>
+                @foreach($types as $type)
+                <option value="{{ $type }}" {{ request('type') == $type ? 'selected' : '' }}>{{ $type }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div style="min-width:130px;">
+            <label class="label">Min Price</label>
+            <input name="min_price" type="number" min="0" step="0.01" value="{{ request('min_price') }}" class="input" placeholder="0" />
+        </div>
+        <div style="min-width:130px;">
+            <label class="label">Max Price</label>
+            <input name="max_price" type="number" min="0" step="0.01" value="{{ request('max_price') }}" class="input" placeholder="9999" />
+        </div>
+        <div style="min-width:160px;">
             <label class="label">Sort By</label>
             <select name="sort" class="input">
                 <option value="newest" {{ request('sort','newest')=='newest'?'selected':'' }}>Newest</option>
@@ -66,7 +92,7 @@
             </select>
         </div>
         <button type="submit" class="btn-primary" style="padding:0.65rem 1.5rem;font-size:0.875rem;border-radius:0.6rem;">Filter</button>
-        @if(request()->hasAny(['search','category','sort']))
+        @if(request()->hasAny(['search','category','brand','type','min_price','max_price','sort']))
         <a href="{{ route('marketplace') }}" style="padding:0.65rem 1rem;color:var(--text-muted);font-size:0.875rem;text-decoration:none;font-weight:500;">&#10005; Clear</a>
         @endif
     </form>
@@ -74,6 +100,8 @@
     <p style="font-size:0.875rem;color:var(--text-muted);margin-bottom:1.25rem;">
         Showing <strong style="color:var(--text);">{{ $products->total() }}</strong> products
         @if(request('category')) in <strong style="color:var(--primary);">{{ request('category') }}</strong> @endif
+        @if(request('brand')) · brand: <strong style="color:var(--primary);">{{ request('brand') }}</strong> @endif
+        @if(request('type')) · type: <strong style="color:var(--primary);">{{ request('type') }}</strong> @endif
     </p>
 
     @if($products->isEmpty())

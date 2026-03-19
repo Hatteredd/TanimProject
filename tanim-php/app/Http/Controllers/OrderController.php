@@ -9,7 +9,10 @@ use App\Models\OrderItem;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use RuntimeException;
+use Throwable;
 
 class OrderController extends Controller
 {
@@ -59,42 +62,65 @@ class OrderController extends Controller
             'notes'            => ['nullable', 'string', 'max:500'],
         ]);
 
-        $cartItems = CartItem::with('product')
-            ->where('user_id', Auth::id())
-            ->get();
+        try {
+            $order = DB::transaction(function () use ($validated) {
+                $cartItems = CartItem::with('product')
+                    ->where('user_id', Auth::id())
+                    ->get();
 
-        if ($cartItems->isEmpty()) {
-            return redirect()->route('cart.index')->with('error', 'Your cart is empty.');
+                if ($cartItems->isEmpty()) {
+                    throw new RuntimeException('Your cart is empty.');
+                }
+
+                $total = 0;
+
+                $order = Order::create([
+                    'user_id'          => Auth::id(),
+                    'order_number'     => Order::generateOrderNumber(),
+                    'status'           => 'pending',
+                    'total_amount'     => 0,
+                    'shipping_address' => $validated['shipping_address'],
+                    'contact_number'   => $validated['contact_number'],
+                    'notes'            => $validated['notes'] ?? null,
+                ]);
+
+                foreach ($cartItems as $item) {
+                    $product = $item->product()->lockForUpdate()->first();
+                    $productName = $item->product?->name ?? 'a selected item';
+
+                    if (!$product || !$product->is_active || $product->stock < $item->quantity) {
+                        throw new RuntimeException("Insufficient stock for {$productName}.");
+                    }
+
+                    $subtotal = $item->quantity * $product->price;
+                    $total += $subtotal;
+
+                    OrderItem::create([
+                        'order_id'     => $order->id,
+                        'product_id'   => $product->id,
+                        'product_name' => $product->name,
+                        'unit_price'   => $product->price,
+                        'quantity'     => $item->quantity,
+                        'subtotal'     => $subtotal,
+                    ]);
+
+                    $product->decrement('stock', $item->quantity);
+                }
+
+                $order->update(['total_amount' => $total]);
+
+                CartItem::where('user_id', Auth::id())->delete();
+
+                return $order;
+            });
+        } catch (Throwable $e) {
+            logger()->error('Order transaction failed: ' . $e->getMessage());
+            $message = $e instanceof RuntimeException
+                ? $e->getMessage()
+                : 'Unable to place order right now. Please try again.';
+
+            return redirect()->route('cart.index')->with('error', $message);
         }
-
-        $total = $cartItems->sum(fn($i) => $i->quantity * $i->product->price);
-
-        $order = Order::create([
-            'user_id'          => Auth::id(),
-            'order_number'     => Order::generateOrderNumber(),
-            'status'           => 'pending',
-            'total_amount'     => $total,
-            'shipping_address' => $validated['shipping_address'],
-            'contact_number'   => $validated['contact_number'],
-            'notes'            => $validated['notes'] ?? null,
-        ]);
-
-        foreach ($cartItems as $item) {
-            OrderItem::create([
-                'order_id'     => $order->id,
-                'product_id'   => $item->product_id,
-                'product_name' => $item->product->name,
-                'unit_price'   => $item->product->price,
-                'quantity'     => $item->quantity,
-                'subtotal'     => $item->quantity * $item->product->price,
-            ]);
-
-            // Reduce stock
-            $item->product->decrement('stock', $item->quantity);
-        }
-
-        // Clear cart
-        CartItem::where('user_id', Auth::id())->delete();
 
         // Generate PDF receipt
         $pdfPath = $this->generateReceiptPdf($order);

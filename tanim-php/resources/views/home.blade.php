@@ -38,6 +38,39 @@
                    onmouseover="this.style.background='rgba(212,168,67,0.25)'" onmouseout="this.style.background='rgba(212,168,67,0.15)'">🌱 Join as a Farmer</a>
             </div>
 
+            {{-- Home Search (Laravel Scout) --}}
+            <form method="GET" action="{{ route('home') }}" style="display:grid;gap:.65rem;background:rgba(15,30,15,.45);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.16);border-radius:1rem;padding:.9rem;margin-bottom:1.25rem;">
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:.55rem;">
+                    <input name="q" type="text" value="{{ request('q') }}" placeholder="Search products (Scout)..." class="input" style="background:rgba(255,255,255,.95);" />
+                    <select name="category" class="input" style="background:rgba(255,255,255,.95);">
+                        <option value="">All Categories</option>
+                        @foreach($categories as $cat)
+                        <option value="{{ $cat }}" {{ request('category') === $cat ? 'selected' : '' }}>{{ $cat }}</option>
+                        @endforeach
+                    </select>
+                    <select name="brand" class="input" style="background:rgba(255,255,255,.95);">
+                        <option value="">All Brands</option>
+                        @foreach($brands as $brand)
+                        <option value="{{ $brand }}" {{ request('brand') === $brand ? 'selected' : '' }}>{{ $brand }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.55rem;">
+                    <select name="type" class="input" style="background:rgba(255,255,255,.95);">
+                        <option value="">All Types</option>
+                        @foreach($types as $type)
+                        <option value="{{ $type }}" {{ request('type') === $type ? 'selected' : '' }}>{{ $type }}</option>
+                        @endforeach
+                    </select>
+                    <input name="min_price" type="number" min="0" step="0.01" value="{{ request('min_price') }}" placeholder="Min Price" class="input" style="background:rgba(255,255,255,.95);" />
+                    <input name="max_price" type="number" min="0" step="0.01" value="{{ request('max_price') }}" placeholder="Max Price" class="input" style="background:rgba(255,255,255,.95);" />
+                    <button type="submit" class="btn-primary" style="padding:.75rem 1.25rem;border-radius:.7rem;">Search</button>
+                    @if(request()->hasAny(['q','category','brand','type','min_price','max_price']))
+                    <a href="{{ route('home') }}" style="display:inline-flex;align-items:center;justify-content:center;padding:.75rem 1rem;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.25);color:#f5f0e8;font-size:.85rem;font-weight:700;border-radius:.7rem;text-decoration:none;">Clear</a>
+                    @endif
+                </div>
+            </form>
+
             {{-- Feature pills --}}
             <div style="display:flex;flex-wrap:wrap;gap:0.65rem;">
                 @foreach(['🌿 No Middlemen','🌾 Fair Harvest Prices','📦 Order Tracking','🇵🇭 Proudly Filipino','🌱 Farm Fresh'] as $pill)
@@ -54,6 +87,55 @@
         <svg style="width:1.5rem;height:1.5rem;color:rgba(212,168,67,0.6);" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg>
     </div>
 </section>
+
+@if($searchResults)
+<section style="padding:4rem 0;background:var(--bg);border-top:1px solid var(--border);">
+<div style="max-width:80rem;margin:0 auto;padding:0 1.5rem;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:1.5rem;gap:1rem;flex-wrap:wrap;">
+        <div>
+            <span class="badge-wheat" style="margin-bottom:.55rem;display:inline-block;">Scout Search</span>
+            <h2 style="font-family:Outfit,sans-serif;font-size:1.9rem;font-weight:800;color:var(--text);margin:0;">Search Results</h2>
+            <p style="font-size:.9rem;color:var(--text-muted);margin:.3rem 0 0;">Found {{ $searchResults->total() }} product(s) for "{{ request('q') }}"</p>
+        </div>
+    </div>
+
+    @if($searchResults->isEmpty())
+    <div style="text-align:center;padding:2.5rem 0;color:var(--text-muted);">No products matched your Scout search and filters.</div>
+    @else
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:1.25rem;">
+        @foreach($searchResults as $product)
+        <div class="product-card">
+            <a href="{{ route('products.show', $product) }}" style="display:block;text-decoration:none;">
+                @php $icons = ['Vegetables'=>'🥦','Fruits'=>'🍓','Grains & Rice'=>'🌾','Root Crops'=>'🥔','Herbs & Spices'=>'🌿']; @endphp
+                <div class="product-card-img" style="height:140px;">
+                    @if($product->primaryPhoto())
+                        <img src="{{ $product->primaryPhoto() }}" alt="{{ $product->name }}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;display:block;z-index:0;" />
+                    @else
+                        <span style="font-size:3rem;position:relative;z-index:1;">{{ $icons[$product->category] ?? '🛒' }}</span>
+                    @endif
+                </div>
+            </a>
+            <div style="padding:.9rem;">
+                <span class="badge" style="font-size:.65rem;">{{ strtoupper($product->category) }}</span>
+                <h3 style="font-size:.95rem;font-weight:700;color:var(--text);margin:.5rem 0 .2rem;">{{ $product->name }}</h3>
+                <p style="font-size:.74rem;color:var(--text-muted);margin:0 0 .45rem;">
+                    {{ $product->brand ?: 'No Brand' }} · {{ $product->type ?: 'No Type' }}
+                </p>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-top:.55rem;">
+                    <div>
+                        <span style="font-size:1.1rem;font-weight:800;color:var(--primary);">&#8369;{{ number_format($product->price, 2) }}</span>
+                        <span style="font-size:.7rem;color:var(--text-light);">/{{ $product->unit }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endforeach
+    </div>
+    <div style="margin-top:1.25rem;display:flex;justify-content:center;">{{ $searchResults->links() }}</div>
+    @endif
+</div>
+</section>
+@endif
 
 {{-- ── FEATURED PRODUCE ──────────────────────────────── --}}
 <section style="padding:5rem 0;background:var(--bg);position:relative;overflow:hidden;">

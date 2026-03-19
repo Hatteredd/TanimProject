@@ -6,7 +6,6 @@ use App\Models\Product;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
-use Maatwebsite\Excel\Concerns\WithValidation;
 use Maatwebsite\Excel\Concerns\SkipsEmptyRows;
 
 class ProductsImport implements ToCollection, WithHeadingRow, SkipsEmptyRows
@@ -28,6 +27,8 @@ class ProductsImport implements ToCollection, WithHeadingRow, SkipsEmptyRows
                 'user_id'      => $this->userId,
                 'name'         => $row['name'],
                 'category'     => $row['category'] ?? 'Uncategorized',
+                'brand'        => $row['brand'] ?? null,
+                'type'         => $row['type'] ?? null,
                 'description'  => $row['description'] ?? '',
                 'price'        => (float) ($row['price'] ?? 0),
                 'unit'         => $row['unit'] ?? 'piece',

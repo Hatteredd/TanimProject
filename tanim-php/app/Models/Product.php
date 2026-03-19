@@ -6,13 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Laravel\Scout\Searchable;
 
 class Product extends Model
 {
-    use SoftDeletes;
+    use Searchable, SoftDeletes;
 
     protected $fillable = [
-        'user_id', 'name', 'category', 'description',
+        'user_id', 'name', 'category', 'brand', 'type', 'description',
         'price', 'unit', 'stock', 'image', 'is_active',
         'farm_location', 'harvest_date',
     ];
@@ -51,6 +52,23 @@ class Product extends Model
     public function avgRating(): float
     {
         return round($this->reviews()->avg('rating') ?? 0, 1);
+    }
+
+    public function toSearchableArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'description' => $this->description,
+            'category' => $this->category,
+            'brand' => $this->brand,
+            'type' => $this->type,
+        ];
+    }
+
+    public function shouldBeSearchable(): bool
+    {
+        return $this->is_active && $this->stock > 0;
     }
 
     public function primaryPhoto(): ?string

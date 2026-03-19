@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Mail\OrderStatusUpdatedMail;
 use App\Models\Order;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
@@ -44,10 +45,13 @@ class OrderAdminController extends Controller
         ]);
 
         $order->update($validated);
+        $order->load('items.product', 'user');
+
+        $pdfPath = $this->generateReceiptPdf($order);
 
         // Send status update email
         try {
-            Mail::to($order->user->email)->send(new OrderStatusUpdatedMail($order));
+            Mail::to($order->user->email)->send(new OrderStatusUpdatedMail($order, $pdfPath));
         } catch (\Exception $e) {
             logger()->error('Status email failed: ' . $e->getMessage());
         }
@@ -98,5 +102,23 @@ class OrderAdminController extends Controller
             ->get();
 
         return response()->json($sales);
+    }
+
+    private function generateReceiptPdf(Order $order): ?string
+    {
+        try {
+            $pdf = Pdf::loadView('pdf.receipt', compact('order'));
+            $path = storage_path('app/receipts/receipt-' . $order->order_number . '.pdf');
+
+            if (!is_dir(storage_path('app/receipts'))) {
+                mkdir(storage_path('app/receipts'), 0755, true);
+            }
+
+            $pdf->save($path);
+            return $path;
+        } catch (\Exception $e) {
+            logger()->error('Status receipt generation failed: ' . $e->getMessage());
+            return null;
+        }
     }
 }

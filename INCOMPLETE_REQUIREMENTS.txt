@@ -1,0 +1,4 @@
+Tanim Project - Not Yet Complete (Simple List)
+
+1) U1 Seeding
+- Not all tables are clearly seeded (example: orders/order_items/cart_items/product_photos/activity_logs/system-wide complete seed coverage not confirmed).

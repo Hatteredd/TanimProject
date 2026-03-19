@@ -21,6 +21,14 @@
                     </select>
                 </div>
                 <div>
+                    <label class="label">Brand</label>
+                    <input name="brand" type="text" class="input" value="{{ old('brand',$product->brand) }}" placeholder="e.g. Tanim Fresh" />
+                </div>
+                <div>
+                    <label class="label">Type</label>
+                    <input name="type" type="text" class="input" value="{{ old('type',$product->type) }}" placeholder="e.g. Organic" />
+                </div>
+                <div>
                     <label class="label">Unit</label>
                     <select name="unit" class="input" required>
                         @foreach(['kg','g','piece','bundle','liter','dozen','sack','box'] as $u)
@@ -58,6 +66,35 @@
                 @endif
                 <input name="image" type="file" class="input" accept="image/*" style="padding:.5rem;" />
             </div>
+            <div>
+                <label class="label">Add Gallery Photos <span style="font-weight:400;color:var(--text-light);">(optional, up to 10)</span></label>
+                <input name="photos[]" type="file" class="input" accept="image/*" multiple style="padding:.5rem;" />
+            </div>
+
+            @if($product->photos->isNotEmpty())
+            <div>
+                <label class="label">Current Gallery</label>
+                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:.75rem;">
+                    @foreach($product->photos as $photo)
+                    <div style="border:1px solid var(--border);background:var(--bg);border-radius:.75rem;padding:.45rem;">
+                        <img src="{{ asset('storage/'.$photo->path) }}" alt="Photo" style="width:100%;height:90px;border-radius:.45rem;object-fit:cover;display:block;" />
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:.45rem;gap:.4rem;">
+                            @if($photo->is_primary)
+                            <span style="font-size:.65rem;font-weight:700;color:var(--primary);">Primary</span>
+                            @else
+                            <span style="font-size:.65rem;color:var(--text-light);">Gallery</span>
+                            @endif
+                            <form method="POST" action="{{ route('admin.products.photos.destroy', [$product, $photo]) }}" style="margin:0;" onsubmit="return confirm('Remove this photo?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" style="padding:.2rem .45rem;background:var(--danger-soft);color:var(--danger);font-size:.65rem;font-weight:700;border:none;border-radius:.4rem;cursor:pointer;">Delete</button>
+                            </form>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+            @endif
             <div style="display:flex;align-items:center;gap:.6rem;">
                 <input type="checkbox" name="is_active" value="1" id="is_active" {{ old('is_active',$product->is_active)?'checked':'' }} style="width:1rem;height:1rem;accent-color:var(--primary);" />
                 <label for="is_active" style="font-size:.875rem;font-weight:600;color:var(--text);cursor:pointer;">Active (visible on marketplace)</label>
