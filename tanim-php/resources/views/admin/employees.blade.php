@@ -1,14 +1,14 @@
 @extends('layouts.admin')
-@section('title','Employees')
-@section('page-title','👥 Employee Management')
+@section('title','Suppliers')
+@section('page-title','🚚 Supplier Management')
 
 @section('content')
 {{-- Payroll summary --}}
 <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1rem;margin-bottom:2rem;">
     @foreach([
-        ['Monthly Payroll', '₱'.number_format($totalSalary,2), 'var(--danger)'],
-        ['Total Bonuses',   '₱'.number_format($totalBonus,2),  'var(--warn-text)'],
-        ['13th Month (Total)', '₱'.number_format($total13th,2), 'var(--primary-2)'],
+        ['Monthly Supplier Cost', '₱'.number_format($totalSalary,2), 'var(--danger)'],
+        ['Total Incentives',      '₱'.number_format($totalBonus,2),  'var(--warn-text)'],
+        ['Annual Projection',     '₱'.number_format($total13th,2),   'var(--primary-2)'],
     ] as [$l,$v,$c])
     <div class="stat-card">
         <p style="font-size:.7rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin:0 0 .3rem;">{{ $l }}</p>
@@ -16,33 +16,33 @@
     </div>
     @endforeach
     <div class="stat-card">
-        <p style="font-size:.7rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin:0 0 .3rem;">Active Employees</p>
+        <p style="font-size:.7rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin:0 0 .3rem;">Active Suppliers</p>
         <p style="font-size:1.4rem;font-weight:900;color:var(--primary);font-family:'Outfit';margin:0;">{{ $employees->where('status','active')->count() }}</p>
     </div>
 </div>
 
 <div style="display:grid;grid-template-columns:1fr 1.8fr;gap:1.5rem;">
-    {{-- Add Employee Form --}}
+    {{-- Add Supplier Form --}}
     <div class="glass" style="border-radius:1.25rem;padding:1.5rem;height:fit-content;">
-        <h2 style="font-family:'Outfit';font-size:1rem;font-weight:800;color:var(--text);margin:0 0 1.25rem;">➕ Add Employee</h2>
-        <form method="POST" action="{{ route('admin.employees.store') }}" style="display:flex;flex-direction:column;gap:.85rem;">
+        <h2 style="font-family:'Outfit';font-size:1rem;font-weight:800;color:var(--text);margin:0 0 1.25rem;">➕ Add Supplier</h2>
+        <form method="POST" action="{{ route('admin.suppliers.store') }}" style="display:flex;flex-direction:column;gap:.85rem;">
             @csrf
-            @foreach([['Name','name','text','Full name'],['Position','position','text','e.g. Delivery Driver'],['Department','department','text','e.g. Logistics']] as [$l,$n,$t,$p])
+            @foreach([['Supplier Name','name','text','Full name'],['Specialty','position','text','e.g. Vegetable Grower'],['Region / Group','department','text','e.g. North Luzon']] as [$l,$n,$t,$p])
             <div>
                 <label style="font-size:.8rem;font-weight:700;color:var(--text-muted);display:block;margin-bottom:.3rem;">{{ $l }}</label>
                 <input name="{{ $n }}" type="{{ $t }}" class="input" placeholder="{{ $p }}" required />
             </div>
             @endforeach
             <div>
-                <label style="font-size:.8rem;font-weight:700;color:var(--text-muted);display:block;margin-bottom:.3rem;">Base Salary (monthly ₱)</label>
+                <label style="font-size:.8rem;font-weight:700;color:var(--text-muted);display:block;margin-bottom:.3rem;">Base Contract Cost (monthly ₱)</label>
                 <input name="base_salary" type="number" step="0.01" class="input" placeholder="0.00" required />
             </div>
             <div>
-                <label style="font-size:.8rem;font-weight:700;color:var(--text-muted);display:block;margin-bottom:.3rem;">Bonus (₱)</label>
+                <label style="font-size:.8rem;font-weight:700;color:var(--text-muted);display:block;margin-bottom:.3rem;">Incentive (₱)</label>
                 <input name="bonus" type="number" step="0.01" class="input" placeholder="0.00" value="0" />
             </div>
             <div>
-                <label style="font-size:.8rem;font-weight:700;color:var(--text-muted);display:block;margin-bottom:.3rem;">Hire Date</label>
+                <label style="font-size:.8rem;font-weight:700;color:var(--text-muted);display:block;margin-bottom:.3rem;">Partnership Date</label>
                 <input name="hire_date" type="date" class="input" value="{{ date('Y-m-d') }}" required />
             </div>
             <div>
@@ -52,17 +52,17 @@
                     <option value="inactive">Inactive</option>
                 </select>
             </div>
-            <button type="submit" class="btn-primary" style="width:100%;justify-content:center;">Add Employee</button>
+            <button type="submit" class="btn-primary" style="width:100%;justify-content:center;">Add Supplier</button>
         </form>
     </div>
 
-    {{-- Employee Table --}}
+    {{-- Supplier Table --}}
     <div class="glass" style="border-radius:1.25rem;padding:1.5rem;overflow-x:auto;">
-        <h2 style="font-family:'Outfit';font-size:1rem;font-weight:800;color:var(--text);margin:0 0 1.25rem;">Employee Records</h2>
+        <h2 style="font-family:'Outfit';font-size:1rem;font-weight:800;color:var(--text);margin:0 0 1.25rem;">Supplier Records</h2>
         <table style="width:100%;border-collapse:collapse;font-size:.82rem;min-width:680px;">
             <thead>
                 <tr style="border-bottom:2px solid var(--border);">
-                    @foreach(['Employee','Department','Base Salary','Bonus','13th Month','Tenure','Status',''] as $h)
+                    @foreach(['Supplier','Region / Group','Base Cost','Incentive','Projection','Partnership','Status',''] as $h)
                     <th style="padding:.6rem .75rem;text-align:left;font-size:.7rem;font-weight:800;color:var(--text-muted);text-transform:uppercase;white-space:nowrap;">{{ $h }}</th>
                     @endforeach
                 </tr>
@@ -85,24 +85,24 @@
                         </span>
                     </td>
                     <td style="padding:.7rem .75rem;">
-                        <form method="POST" action="{{ route('admin.employees.destroy', $emp) }}">
+                        <form method="POST" action="{{ route('admin.suppliers.destroy', $emp) }}">
                             @csrf @method('DELETE')
                             <button type="submit" style="background:none;border:none;cursor:pointer;color:var(--text-light);" onmouseover="this.style.color='#dc2626'" onmouseout="this.style.color='var(--text-light)'" onclick="return confirm('Remove {{ $emp->name }}?')">✕</button>
                         </form>
                     </td>
                 </tr>
                 @empty
-                <tr><td colspan="8" style="padding:2rem;text-align:center;color:var(--text-muted);">No employees found.</td></tr>
+                <tr><td colspan="8" style="padding:2rem;text-align:center;color:var(--text-muted);">No suppliers found.</td></tr>
                 @endforelse
             </tbody>
         </table>
 
-        {{-- Payroll legend --}}
+        {{-- Cost note --}}
         <div style="margin-top:1.5rem;padding:1rem;background:var(--bg);border-radius:.85rem;border:1px solid var(--border);">
-            <p style="font-size:.75rem;font-weight:700;color:var(--text-muted);margin:0 0 .4rem;">📌 How 13th Month Pay is Calculated</p>
+            <p style="font-size:.75rem;font-weight:700;color:var(--text-muted);margin:0 0 .4rem;">📌 Annual Supplier Projection Formula</p>
             <p style="font-size:.8rem;color:var(--text-muted);margin:0;line-height:1.6;">
-                <strong style="color:var(--text);">13th Month = (Basic Salary × Months Worked This Year) ÷ 12</strong><br>
-                Per Philippine Labor Law (PD 851). Paid on or before December 24.
+                <strong style="color:var(--text);">Projection = (Base Cost × Months Active This Year) ÷ 12</strong><br>
+                This helps estimate annual supplier spend using your current records.
             </p>
         </div>
     </div>

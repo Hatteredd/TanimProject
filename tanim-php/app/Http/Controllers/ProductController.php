@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Order;
 use App\Models\Product;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -114,11 +115,19 @@ class ProductController extends Controller
             ? $reviews->firstWhere('user_id', Auth::id())
             : null;
 
+        $canReview = false;
+        if (Auth::check()) {
+            $canReview = Order::where('user_id', Auth::id())
+                ->where('status', 'delivered')
+                ->whereHas('items', fn (Builder $q) => $q->where('product_id', $product->id))
+                ->exists();
+        }
+
         $fromSameFarm = Product::where('id', '!=', $product->id)
             ->where('is_active', true)
             ->limit(6)->get();
 
-        return view('product-detail', compact('product', 'reviews', 'avgRating', 'reviewCount', 'fromSameFarm', 'userReview'));
+        return view('product-detail', compact('product', 'reviews', 'avgRating', 'reviewCount', 'fromSameFarm', 'userReview', 'canReview'));
     }
 
     private function applyFilters(Builder $query, Request $request): Builder

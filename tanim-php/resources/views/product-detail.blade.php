@@ -442,7 +442,7 @@
 
 
     {{-- ── REVIEWS SECTION ── --}}
-    <section style="margin-bottom:3.5rem;">
+    <section id="reviews" style="margin-bottom:3.5rem;">
         <h2 class="section-heading">⭐ Customer Reviews</h2>
 
         <div class="review-summary">
@@ -479,7 +479,7 @@
         <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:0.75rem;padding:0.85rem 1rem;margin-bottom:1.25rem;color:#dc2626;font-size:0.875rem;">{{ $errors->first('review') }}</div>
         @endif
 
-        @if(!$userReview)
+        @if($canReview && !$userReview)
         <div class="glass" style="border-radius:1.25rem;padding:1.5rem;margin-bottom:1.5rem;">
             <h3 style="font-size:1rem;font-weight:800;color:var(--text);margin:0 0 1rem;">Write a Review</h3>
             <form method="POST" action="{{ route('reviews.store', $product) }}">
@@ -502,7 +502,7 @@
                 <button type="submit" class="btn-primary" style="padding:0.65rem 1.5rem;">Submit Review</button>
             </form>
         </div>
-        @else
+        @elseif($canReview)
         <div class="glass" style="border-radius:1.25rem;padding:1.5rem;margin-bottom:1.5rem;">
             <h3 style="font-size:1rem;font-weight:800;color:var(--text);margin:0 0 1rem;">Update Your Review</h3>
             <form method="POST" action="{{ route('reviews.update', $userReview) }}">
@@ -529,6 +529,10 @@
                     </form>
                 </div>
             </form>
+        </div>
+        @else
+        <div class="glass" style="border-radius:1.25rem;padding:1.1rem 1.25rem;margin-bottom:1.5rem;">
+            <p style="margin:0;font-size:0.86rem;color:var(--text-muted);">You can submit a review after this product is delivered in one of your orders.</p>
         </div>
         @endif
         @endauth

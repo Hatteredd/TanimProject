@@ -31,12 +31,12 @@ class EmployeeController extends Controller
             'notes'       => 'nullable|string',
         ]);
         Employee::create($data);
-        return back()->with('success', 'Employee added.');
+        return back()->with('success', 'Supplier added.');
     }
 
     public function destroy(Employee $employee)
     {
         $employee->delete();
-        return back()->with('success', 'Employee removed.');
+        return back()->with('success', 'Supplier removed.');
     }
 }

@@ -139,6 +139,8 @@
                         {{ $product->stock <= 10 ? '&#9888; Low stock' : $product->stock . ' in stock' }}
                     </span>
                 </div>
+                <div style="height:1px;background:linear-gradient(90deg,transparent,var(--border-glass),transparent);margin:0.75rem 0;"></div>
+                <div style="padding:0.65rem;border:1px solid var(--border);border-radius:0.8rem;background:var(--bg-glass);">
                 @auth
                 @if(Auth::user()->role === 'admin')
                 {{-- Admin product actions --}}
@@ -162,6 +164,7 @@
                 @else
                 <a href="{{ route('login') }}" class="btn-ghost" style="display:block;width:100%;padding:0.6rem;font-size:0.875rem;border-radius:0.6rem;text-align:center;box-sizing:border-box;">Login to Buy</a>
                 @endauth
+                </div>
             </div>
         </div>
         @endforeach

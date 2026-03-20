@@ -3,6 +3,14 @@
 <div style="min-height:60vh;padding:2.5rem 0;">
 <div style="max-width:56rem;margin:0 auto;padding:0 1.5rem;">
 
+    @php
+        $backUrl = url()->previous() !== url()->current() ? url()->previous() : route('marketplace');
+    @endphp
+
+    <div style="margin-bottom:0.9rem;">
+        <a href="{{ $backUrl }}" class="btn-ghost" style="padding:0.45rem 0.95rem;font-size:0.82rem;border-radius:0.65rem;">&larr; Back</a>
+    </div>
+
     <div style="margin-bottom:2rem;">
         <h1 class="section-title">&#128722; Your Cart</h1>
         <p style="color:var(--text-muted);font-size:0.95rem;margin:0.25rem 0 0;">Review your items before checkout</p>

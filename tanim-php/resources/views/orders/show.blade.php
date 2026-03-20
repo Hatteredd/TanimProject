@@ -20,6 +20,19 @@
                 <div>
                     <p style="font-size:0.9rem;font-weight:700;color:var(--text);margin:0;">{{ $item->product_name }}</p>
                     <p style="font-size:0.8rem;color:var(--text-light);margin:0;">{{ $item->quantity }} x &#8369;{{ number_format($item->unit_price, 2) }}</p>
+                    @if($item->product)
+                    <a href="{{ route('products.show', $item->product) }}#reviews" style="font-size:0.78rem;color:var(--primary);font-weight:700;text-decoration:none;display:inline-block;margin-top:0.25rem;">View product details</a>
+                    @endif
+                    @if($order->status === 'delivered' && $item->product)
+                        @php
+                            $canReview = !\App\Models\Review::where('user_id', auth()->id())
+                                ->where('product_id', $item->product->id)
+                                ->exists();
+                        @endphp
+                        @if($canReview)
+                        <a href="{{ route('products.show', $item->product) }}#reviews" style="font-size:0.78rem;color:var(--wheat-2);font-weight:700;text-decoration:none;display:inline-block;margin:0.25rem 0 0 0.6rem;">Write a review</a>
+                        @endif
+                    @endif
                 </div>
                 <span style="font-size:0.9rem;font-weight:700;color:var(--primary);">&#8369;{{ number_format($item->subtotal, 2) }}</span>
             </div>

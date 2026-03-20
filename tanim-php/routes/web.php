@@ -18,7 +18,6 @@ use App\Http\Controllers\Admin\OrderAdminController;
 use App\Http\Controllers\Admin\ReviewAdminController;
 use App\Http\Controllers\Admin\ProductAdminController;
 use App\Http\Controllers\Admin\ReportController;
-use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\LogController;
 use App\Http\Controllers\Admin\DataController;
 
@@ -90,6 +89,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::delete('/users/{user}',              [UserController::class, 'destroy'])->name('users.destroy');
     Route::post('/users/{user}/toggle-active',  [UserController::class, 'toggleActive'])->name('users.toggle-active');
     Route::post('/users/{user}/role',           [UserController::class, 'updateRole'])->name('users.update-role');
+    Route::get('/admins', function () {
+        return redirect()->route('admin.users.index', ['role' => 'admin']);
+    })->name('admins.index');
 
     // Products (admin content management)
     Route::get('/products',                     [ProductAdminController::class, 'index'])->name('products.index');
@@ -116,10 +118,6 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/data/{table}',                 [DataController::class, 'viewTable'])->name('data.table');
     Route::get('/data/{table}/export',          [DataController::class, 'exportCsv'])->name('data.export');
 
-    // Settings
-    Route::get('/settings',                     [SettingsController::class, 'index'])->name('settings');
-    Route::post('/settings',                    [SettingsController::class, 'update'])->name('settings.update');
-
     // Activity Logs
     Route::get('/logs',                         [LogController::class, 'index'])->name('logs');
     Route::post('/logs/clear',                  [LogController::class, 'clear'])->name('logs.clear');
@@ -137,8 +135,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/expenses',             [ExpenseController::class, 'store'])->name('expenses.store');
     Route::delete('/expenses/{expense}', [ExpenseController::class, 'destroy'])->name('expenses.destroy');
 
-    // Employees
-    Route::get('/employees',               [EmployeeController::class, 'index'])->name('employees');
-    Route::post('/employees',              [EmployeeController::class, 'store'])->name('employees.store');
-    Route::delete('/employees/{employee}', [EmployeeController::class, 'destroy'])->name('employees.destroy');
+    // Suppliers (backed by Employee model/table)
+    Route::get('/suppliers',               [EmployeeController::class, 'index'])->name('suppliers');
+    Route::post('/suppliers',              [EmployeeController::class, 'store'])->name('suppliers.store');
+    Route::delete('/suppliers/{employee}', [EmployeeController::class, 'destroy'])->name('suppliers.destroy');
 });

@@ -13,8 +13,11 @@ class ReviewAdminController extends Controller
         $query = Review::with(['user', 'product'])->latest();
 
         if ($request->filled('search')) {
-            $query->whereHas('user', fn($q) => $q->where('name', 'like', '%' . $request->search . '%'))
-                  ->orWhereHas('product', fn($q) => $q->where('name', 'like', '%' . $request->search . '%'));
+            $term = '%' . $request->search . '%';
+            $query->where(function ($q) use ($term) {
+                $q->whereHas('user', fn($uq) => $uq->where('name', 'like', $term))
+                  ->orWhereHas('product', fn($pq) => $pq->where('name', 'like', $term));
+            });
         }
 
         if ($request->filled('rating')) {

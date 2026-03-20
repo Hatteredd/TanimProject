@@ -4,7 +4,15 @@
     <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@yield('title', 'Admin') — Tanim Admin</title>
     <link href="https://fonts.bunny.net/css?family=outfit:400,500,600,700,800,900|dm-sans:400,500,600,700" rel="stylesheet">
-    @vite(['resources/css/app.css','resources/js/app.js'])
+    @if (file_exists(public_path('hot')) || file_exists(public_path('build/manifest.json')))
+        @vite(['resources/css/app.css','resources/js/app.js'])
+    @else
+        @php
+            $fallbackCss = file_get_contents(resource_path('css/app.css')) ?: '';
+            $fallbackCss = preg_replace('/^\s*@import\s+"tailwindcss";\s*$/m', '', $fallbackCss);
+        @endphp
+        <style>{!! $fallbackCss !!}</style>
+    @endif
     <script>(function(){const s=localStorage.getItem('tanim-theme');if(s==='dark'||(!s&&window.matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.classList.add('dark')})();</script>
     <style>
     /* ── Shell ── */
@@ -109,6 +117,9 @@
             <a href="{{ route('admin.users.index') }}" class="nav-item {{ str_starts_with($r,'admin.users') ? 'active' : '' }}">
                 <span class="nav-icon">👤</span> Users
             </a>
+            <a href="{{ route('admin.admins.index') }}" class="nav-item {{ request('role') === 'admin' ? 'active' : '' }}">
+                <span class="nav-icon">🛡️</span> Manage Admins
+            </a>
 
             {{-- Content Management --}}
             <div class="nav-group-label">Content</div>
@@ -130,8 +141,8 @@
             <a href="{{ route('admin.expenses') }}" class="nav-item {{ $r === 'admin.expenses' ? 'active' : '' }}">
                 <span class="nav-icon">💰</span> Expenses
             </a>
-            <a href="{{ route('admin.employees') }}" class="nav-item {{ $r === 'admin.employees' ? 'active' : '' }}">
-                <span class="nav-icon">👥</span> Employees
+            <a href="{{ route('admin.suppliers') }}" class="nav-item {{ str_starts_with($r,'admin.suppliers') ? 'active' : '' }}">
+                <span class="nav-icon">🚚</span> Suppliers
             </a>
 
             {{-- Data Management --}}
@@ -142,9 +153,6 @@
 
             {{-- System --}}
             <div class="nav-group-label">System</div>
-            <a href="{{ route('admin.settings') }}" class="nav-item {{ $r === 'admin.settings' ? 'active' : '' }}">
-                <span class="nav-icon">⚙️</span> Settings
-            </a>
             <a href="{{ route('admin.logs') }}" class="nav-item {{ $r === 'admin.logs' ? 'active' : '' }}">
                 <span class="nav-icon">📋</span> Activity Logs
             </a>

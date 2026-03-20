@@ -1,11 +1,11 @@
 <style>
 .nav-wrap {
     position: sticky; top: 0; z-index: 100;
-    background: var(--bg-glass);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
+    background: linear-gradient(180deg, rgba(250,247,240,0.95), rgba(250,247,240,0.88));
+    backdrop-filter: blur(14px) saturate(130%);
+    -webkit-backdrop-filter: blur(14px) saturate(130%);
     border-bottom: 1px solid var(--border);
-    box-shadow: 0 2px 20px rgba(0,0,0,0.06);
+    box-shadow: 0 6px 24px rgba(28,18,8,0.10);
     transition: background 0.35s ease, border-color 0.35s ease;
 }
 .nav-inner {
@@ -38,16 +38,6 @@
 }
 .nav-link:hover { color: var(--primary); }
 .nav-right { display: flex; align-items: center; gap: 0.5rem; }
-
-/* Theme toggle */
-.theme-btn {
-    width: 2.25rem; height: 2.25rem; border-radius: 9999px;
-    border: none; background: transparent; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    color: var(--text-muted);
-    transition: background 0.2s, color 0.2s;
-}
-.theme-btn:hover { background: var(--primary-faint); color: var(--primary); }
 
 /* Cart bubble */
 .cart-btn {
@@ -104,17 +94,6 @@
 
         {{-- Right actions --}}
         <div class="nav-right">
-            {{-- Theme toggle --}}
-            <button class="theme-btn" id="theme-toggle" onclick="toggleTheme()" title="Toggle theme" aria-label="Toggle dark mode">
-                <svg id="icon-sun" style="width:1.1rem;height:1.1rem;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                    <circle cx="12" cy="12" r="4"/>
-                    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
-                </svg>
-                <svg id="icon-moon" style="width:1.1rem;height:1.1rem;display:none;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
-                </svg>
-            </button>
-
             @auth
                 {{-- Cart (buyers/farmers only) --}}
                 @if(Auth::user()->role !== 'admin')
@@ -143,22 +122,3 @@
         </div>
     </div>
 </nav>
-
-<script>
-function syncThemeIcon() {
-    const dark = document.documentElement.classList.contains('dark');
-    document.getElementById('icon-sun').style.display  = dark ? 'none'  : 'block';
-    document.getElementById('icon-moon').style.display = dark ? 'block' : 'none';
-}
-
-function toggleTheme() {
-    const isDark = document.documentElement.classList.toggle('dark');
-    localStorage.setItem('tanim-theme', isDark ? 'dark' : 'light');
-    syncThemeIcon();
-}
-
-// Run on load so icon matches current theme
-document.addEventListener('DOMContentLoaded', syncThemeIcon);
-// Also run immediately in case DOMContentLoaded already fired
-syncThemeIcon();
-</script>

@@ -14,7 +14,7 @@ class ReviewController extends Controller
     {
         // Only buyers who purchased the product can review
         $hasPurchased = Order::where('user_id', Auth::id())
-            ->whereIn('status', ['delivered', 'shipped'])
+            ->where('status', 'delivered')
             ->whereHas('items', fn($q) => $q->where('product_id', $product->id))
             ->exists();
 

@@ -67,8 +67,15 @@
                 <input name="image" type="file" class="input" accept="image/*" style="padding:.5rem;" />
             </div>
             <div>
-                <label class="label">Add Gallery Photos <span style="font-weight:400;color:var(--text-light);">(optional, up to 10)</span></label>
-                <input name="photos[]" type="file" class="input" accept="image/*" multiple style="padding:.5rem;" />
+                <label class="label">Add Gallery Photos <span style="font-weight:400;color:var(--text-light);">(optional, up to 3 total)</span></label>
+                <div id="drop-zone-edit" style="border:2px dashed var(--border);border-radius:.75rem;padding:1.5rem;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg-soft);">
+                    <div style="font-size:2rem;margin-bottom:.5rem;">📁</div>
+                    <p style="margin:0;font-weight:600;color:var(--text);">Drag photos here or click to select</p>
+                    <p style="margin:.25rem 0 0;font-size:.75rem;color:var(--text-light);">You can select multiple photos at once (up to 3)</p>
+                </div>
+                <input id="photos-input-edit" name="photos[]" type="file" class="input" accept="image/*" multiple style="display:none;" />
+                <div id="preview-edit" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:.75rem;margin-top:1rem;"></div>
+                <p style="margin:.5rem 0 0;font-size:.72rem;color:var(--text-light);">You can keep up to 3 gallery photos per product.</p>
             </div>
 
             @if($product->photos->isNotEmpty())
@@ -107,4 +114,61 @@
     </form>
 </div>
 </div>
+<script>
+const dropZone = document.getElementById('drop-zone-edit');
+const fileInput = document.getElementById('photos-input-edit');
+const preview = document.getElementById('preview-edit');
+const maxFiles = 3;
+
+function handleFiles(files) {
+    if (files.length > maxFiles) {
+        alert(`Please select up to ${maxFiles} photos only.`);
+        return;
+    }
+    fileInput.files = files;
+    updatePreview(files);
+}
+
+function updatePreview(files) {
+    preview.innerHTML = '';
+    Array.from(files).forEach((file, index) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const div = document.createElement('div');
+            div.style.cssText = 'position:relative;border-radius:.5rem;overflow:hidden;border:1px solid var(--border);';
+            div.innerHTML = `
+                <img src="${e.target.result}" style="width:100%;height:100px;object-fit:cover;display:block;" />
+                <div style="position:absolute;top:0;right:0;background:var(--primary);color:white;font-size:.65rem;padding:.25rem .5rem;border-radius:0 0 0 .4rem;font-weight:700;">+${index + 1}</div>
+            `;
+            preview.appendChild(div);
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+dropZone.addEventListener('click', () => fileInput.click());
+
+dropZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropZone.style.borderColor = 'var(--primary)';
+    dropZone.style.backgroundColor = 'var(--primary)';
+    dropZone.style.opacity = '0.1';
+});
+
+dropZone.addEventListener('dragleave', () => {
+    dropZone.style.borderColor = 'var(--border)';
+    dropZone.style.backgroundColor = 'var(--bg-soft)';
+    dropZone.style.opacity = '1';
+});
+
+dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.style.borderColor = 'var(--border)';
+    dropZone.style.backgroundColor = 'var(--bg-soft)';
+    dropZone.style.opacity = '1';
+    handleFiles(e.dataTransfer.files);
+});
+
+fileInput.addEventListener('change', (e) => updatePreview(e.target.files));
+</script>
 @endsection

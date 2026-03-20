@@ -30,7 +30,20 @@ class DataController extends Controller
         $data = match($table) {
             'users'    => User::all(['id','name','email','role','is_active','created_at']),
             'products' => Product::withTrashed()->get(),
-            'orders'   => Order::with('user:id,name,email')->get(),
+            'orders'   => Order::with('user:id,name,email')->latest()->get()->map(function ($order) {
+                return [
+                    'id' => $order->id,
+                    'order_number' => $order->order_number,
+                    'status' => $order->status,
+                    'total_amount' => $order->total_amount,
+                    'user_id' => $order->user_id,
+                    'user_name' => $order->user?->name,
+                    'user_email' => $order->user?->email,
+                    'shipping_address' => $order->shipping_address,
+                    'contact_number' => $order->contact_number,
+                    'created_at' => $order->created_at,
+                ];
+            }),
         };
 
         $filename = "{$table}-export-" . now()->format('Y-m-d') . ".csv";
@@ -41,9 +54,12 @@ class DataController extends Controller
             if ($data->isEmpty()) { fclose($out); return; }
 
             // Header row
-            fputcsv($out, array_keys($data->first()->toArray()));
+            $firstRow = $data->first();
+            $firstArray = is_array($firstRow) ? $firstRow : $firstRow->toArray();
+            fputcsv($out, array_keys($firstArray));
             foreach ($data as $row) {
-                fputcsv($out, array_values($row->toArray()));
+                $rowArray = is_array($row) ? $row : $row->toArray();
+                fputcsv($out, array_values($rowArray));
             }
             fclose($out);
         };
@@ -60,7 +76,20 @@ class DataController extends Controller
         $rows = match($table) {
             'users'    => User::latest()->paginate(25),
             'products' => Product::withTrashed()->latest()->paginate(25),
-            'orders'   => Order::with('user')->latest()->paginate(25),
+            'orders'   => Order::with('user:id,name,email')->latest()->paginate(25)->through(function ($order) {
+                return [
+                    'id' => $order->id,
+                    'order_number' => $order->order_number,
+                    'status' => $order->status,
+                    'total_amount' => $order->total_amount,
+                    'user_id' => $order->user_id,
+                    'user_name' => $order->user?->name,
+                    'user_email' => $order->user?->email,
+                    'shipping_address' => $order->shipping_address,
+                    'contact_number' => $order->contact_number,
+                    'created_at' => optional($order->created_at)->format('Y-m-d H:i:s'),
+                ];
+            }),
         };
 
         ActivityLog::record('export', "Admin viewed {$table} table records");

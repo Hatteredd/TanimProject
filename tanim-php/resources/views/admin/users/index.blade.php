@@ -1,6 +1,6 @@
 @extends('layouts.admin')
-@section('title','Users')
-@section('page-title','👤 User Management')
+@section('title', request('role') === 'admin' ? 'Manage Admins' : 'Users')
+@section('page-title', request('role') === 'admin' ? '🛡️ Manage Admins' : '👤 User Management')
 @section('content')
 
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;flex-wrap:wrap;gap:.75rem;">

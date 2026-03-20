@@ -61,7 +61,7 @@ class ProductAdminController extends Controller
             'harvest_date'  => 'nullable|date',
             'is_active'     => 'boolean',
             'image'         => 'nullable|image|mimes:jpg,jpeg,png,webp|max:3072',
-            'photos'        => 'nullable|array|max:10',
+            'photos'        => 'nullable|array|max:3',
             'photos.*'      => 'image|mimes:jpg,jpeg,png,webp|max:4096',
         ]);
 
@@ -116,7 +116,7 @@ class ProductAdminController extends Controller
             'harvest_date'  => 'nullable|date',
             'is_active'     => 'boolean',
             'image'         => 'nullable|image|mimes:jpg,jpeg,png,webp|max:3072',
-            'photos'        => 'nullable|array|max:10',
+            'photos'        => 'nullable|array|max:3',
             'photos.*'      => 'image|mimes:jpg,jpeg,png,webp|max:4096',
         ]);
 
@@ -129,6 +129,14 @@ class ProductAdminController extends Controller
         $product->update($data);
 
         if ($request->hasFile('photos')) {
+            $existingCount = $product->photos()->count();
+            $incomingCount = count($request->file('photos'));
+            if (($existingCount + $incomingCount) > 3) {
+                return back()
+                    ->withErrors(['photos' => 'You can only keep up to 3 gallery photos per product.'])
+                    ->withInput();
+            }
+
             $nextOrder = ((int) $product->photos()->max('sort_order')) + 1;
             $hasPrimary = $product->photos()->where('is_primary', true)->exists();
 

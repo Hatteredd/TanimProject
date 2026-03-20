@@ -8,17 +8,22 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 
 class ReportController extends Controller
 {
     public function index()
     {
         $year = now()->year;
+        $driver = DB::connection()->getDriverName();
+        $monthExpr = $driver === 'sqlite'
+            ? "CAST(strftime('%m', created_at) AS INTEGER)"
+            : 'MONTH(created_at)';
 
         // Monthly sales (all 12 months)
         $monthlySales = Order::whereYear('created_at', $year)
             ->whereNotIn('status', ['cancelled'])
-            ->selectRaw('MONTH(created_at) as month, SUM(total_amount) as total, COUNT(*) as count')
+            ->selectRaw("{$monthExpr} as month, SUM(total_amount) as total, COUNT(*) as count")
             ->groupBy('month')->orderBy('month')->get()->keyBy('month');
 
         $monthlyData = [];
@@ -37,7 +42,7 @@ class ReportController extends Controller
         // Customer registrations by month (buyers only)
         $userRegs = User::where('role', 'buyer')
             ->whereYear('created_at', $year)
-            ->selectRaw('MONTH(created_at) as month, COUNT(*) as count')
+            ->selectRaw("{$monthExpr} as month, COUNT(*) as count")
             ->groupBy('month')->orderBy('month')->get()->keyBy('month');
 
         $userRegData = [];
