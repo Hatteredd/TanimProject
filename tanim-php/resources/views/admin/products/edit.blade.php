@@ -4,7 +4,7 @@
 @section('content')
 <div style="max-width:42rem;">
 <div class="page-card" style="padding:1.75rem;">
-    <form method="POST" action="{{ route('admin.products.update', $product) }}" enctype="multipart/form-data">
+    <form id="product-form" method="POST" action="{{ route('admin.products.update', $product) }}" enctype="multipart/form-data">
         @csrf @method('PUT')
         <div style="display:grid;gap:1rem;">
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
@@ -58,22 +58,13 @@
                 </div>
             </div>
             <div>
-                <label class="label">Replace Image <span style="font-weight:400;color:var(--text-light);">(optional)</span></label>
-                @if($product->image)
-                <div style="margin-bottom:.5rem;">
-                    <img src="{{ asset('storage/'.$product->image) }}" style="height:80px;border-radius:.5rem;object-fit:cover;" />
-                </div>
-                @endif
-                <input name="image" type="file" class="input" accept="image/*" style="padding:.5rem;" />
-            </div>
-            <div>
                 <label class="label">Add Gallery Photos <span style="font-weight:400;color:var(--text-light);">(optional, up to 3 total)</span></label>
                 <div id="drop-zone-edit" style="border:2px dashed var(--border);border-radius:.75rem;padding:1.5rem;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg-soft);">
                     <div style="font-size:2rem;margin-bottom:.5rem;">📁</div>
                     <p style="margin:0;font-weight:600;color:var(--text);">Drag photos here or click to select</p>
                     <p style="margin:.25rem 0 0;font-size:.75rem;color:var(--text-light);">You can select multiple photos at once (up to 3)</p>
                 </div>
-                <input id="photos-input-edit" name="photos[]" type="file" class="input" accept="image/*" multiple style="display:none;" />
+                <input id="photos-input-edit" type="file" class="input" accept="image/*" multiple style="display:none;" />
                 <div id="preview-edit" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:.75rem;margin-top:1rem;"></div>
                 <p style="margin:.5rem 0 0;font-size:.72rem;color:var(--text-light);">You can keep up to 3 gallery photos per product.</p>
             </div>
@@ -83,7 +74,7 @@
                 <label class="label">Current Gallery</label>
                 <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:.75rem;">
                     @foreach($product->photos as $photo)
-                    <div style="border:1px solid var(--border);background:var(--bg);border-radius:.75rem;padding:.45rem;">
+                    <div style="border:1px solid var(--border);background:var(--bg);border-radius:.75rem;padding:.45rem;position:relative;">
                         <img src="{{ asset('storage/'.$photo->path) }}" alt="Photo" style="width:100%;height:90px;border-radius:.45rem;object-fit:cover;display:block;" />
                         <div style="display:flex;align-items:center;justify-content:space-between;margin-top:.45rem;gap:.4rem;">
                             @if($photo->is_primary)
@@ -91,11 +82,7 @@
                             @else
                             <span style="font-size:.65rem;color:var(--text-light);">Gallery</span>
                             @endif
-                            <form method="POST" action="{{ route('admin.products.photos.destroy', [$product, $photo]) }}" style="margin:0;" onsubmit="return confirm('Remove this photo?')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" style="padding:.2rem .45rem;background:var(--danger-soft);color:var(--danger);font-size:.65rem;font-weight:700;border:none;border-radius:.4rem;cursor:pointer;">Delete</button>
-                            </form>
+                            <button type="button" onclick="deletePhoto('{{ route('admin.products.photos.destroy', [$product, $photo]) }}')" style="padding:.2rem .45rem;background:var(--danger-soft);color:var(--danger);font-size:.65rem;font-weight:700;border:none;border-radius:.4rem;cursor:pointer;">Delete</button>
                         </div>
                     </div>
                     @endforeach
@@ -118,20 +105,25 @@
 const dropZone = document.getElementById('drop-zone-edit');
 const fileInput = document.getElementById('photos-input-edit');
 const preview = document.getElementById('preview-edit');
+const form = document.getElementById('product-form');
 const maxFiles = 3;
+let selectedFiles = [];
 
-function handleFiles(files) {
-    if (files.length > maxFiles) {
-        alert(`Please select up to ${maxFiles} photos only.`);
-        return;
+function countCurrentPhotos() {
+    // Count existing gallery photos from the DOM
+    const galleryLabel = Array.from(document.querySelectorAll('label')).find(l => l.textContent.includes('Current Gallery'));
+    if (galleryLabel) {
+        const section = galleryLabel.parentElement;
+        const photos = section.querySelectorAll('img[alt*="Photo"]');
+        return photos.length;
     }
-    fileInput.files = files;
-    updatePreview(files);
+    return 0;
 }
 
 function updatePreview(files) {
+    selectedFiles = Array.from(files).slice(0, maxFiles);
     preview.innerHTML = '';
-    Array.from(files).forEach((file, index) => {
+    selectedFiles.forEach((file, index) => {
         const reader = new FileReader();
         reader.onload = (e) => {
             const div = document.createElement('div');
@@ -166,9 +158,109 @@ dropZone.addEventListener('drop', (e) => {
     dropZone.style.borderColor = 'var(--border)';
     dropZone.style.backgroundColor = 'var(--bg-soft)';
     dropZone.style.opacity = '1';
-    handleFiles(e.dataTransfer.files);
+    
+    const currentCount = countCurrentPhotos();
+    const totalWould = currentCount + e.dataTransfer.files.length;
+    
+    if (totalWould > maxFiles) {
+        const remaining = maxFiles - currentCount;
+        alert(`You already have ${currentCount} photo(s). You can add ${remaining} more.\n\nYou tried to add ${e.dataTransfer.files.length} files, which would exceed the limit of ${maxFiles} total photos.\n\nPlease select up to ${remaining} photo(s).`);
+        return;
+    }
+    
+    if (e.dataTransfer.files.length > maxFiles) {
+        alert(`You can only add up to ${maxFiles} gallery photos. You dropped ${e.dataTransfer.files.length} files.\n\nPlease try with up to ${maxFiles} photos.`);
+        return;
+    }
+    updatePreview(e.dataTransfer.files);
 });
 
-fileInput.addEventListener('change', (e) => updatePreview(e.target.files));
+fileInput.addEventListener('change', (e) => {
+    const currentCount = countCurrentPhotos();
+    const totalWould = currentCount + e.target.files.length;
+    
+    if (totalWould > maxFiles) {
+        const remaining = maxFiles - currentCount;
+        alert(`You already have ${currentCount} photo(s). You can add ${remaining} more.\n\nYou tried to add ${e.target.files.length} files, which would exceed the limit of ${maxFiles} total photos.\n\nPlease select up to ${remaining} photo(s).`);
+        e.target.value = '';
+        selectedFiles = [];
+        preview.innerHTML = '';
+        return;
+    }
+    
+    if (e.target.files.length > maxFiles) {
+        alert(`You can only add up to ${maxFiles} gallery photos. You selected ${e.target.files.length} files.\n\nPlease select up to ${maxFiles} photos and try again.`);
+        e.target.value = '';
+        selectedFiles = [];
+        preview.innerHTML = '';
+        return;
+    }
+    updatePreview(e.target.files);
+});
+
+function deletePhoto(url) {
+    if (!confirm('Remove this photo?')) return;
+    
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    
+    fetch(url, {
+        method: 'DELETE',
+        headers: {
+            'X-CSRF-TOKEN': csrfToken,
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => {
+        if (response.ok) {
+            location.reload();
+            return;
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+    })
+    .catch(err => {
+        console.error('Delete error:', err);
+        alert('Failed to delete photo. Please try again.');
+    });
+}
+
+form.addEventListener('submit', (e) => {
+    if (selectedFiles.length > 0) {
+        e.preventDefault();
+        
+        const formData = new FormData(form);
+        
+        // Remove old photos[] fields if any
+        formData.delete('photos[]');
+        
+        // Add selected files
+        selectedFiles.forEach(file => {
+            formData.append('photos[]', file);
+        });
+        
+        // Submit via fetch
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                window.location.href = '{{ route("admin.products.index") }}';
+            } else {
+                return response.text().then(html => {
+                    alert('Error saving product. Check console for details.');
+                    console.log(html);
+                });
+            }
+        })
+        .catch(err => {
+            console.error('Submit error:', err);
+            alert('Error saving product');
+        });
+    }
+});
 </script>
 @endsection

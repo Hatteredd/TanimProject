@@ -210,7 +210,7 @@ class ProductAdminController extends Controller
 
         ActivityLog::record('delete', "Admin removed product photo: {$product->name}", $product);
 
-        return back()->with('success', 'Product photo removed.');
+        return response()->json(['success' => true, 'message' => 'Photo deleted']);
     }
 
     public function import(Request $request)

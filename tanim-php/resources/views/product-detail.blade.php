@@ -48,8 +48,8 @@
     background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.3), transparent 60%);
 }
 .pd-category-badge {
-    position: absolute; top: 1rem; left: 1rem;
-    z-index: 2;
+    margin-bottom: 1rem;
+    display: inline-block;
 }
 
 .pd-thumb-grid {
@@ -311,9 +311,9 @@
                 @else
                     {{ $icons[$product->category] ?? '🛒' }}
                 @endif
-                <div class="pd-category-badge">
-                    <span class="badge">{{ $product->category }}</span>
-                </div>
+            </div>
+            <div class="pd-category-badge">
+                <span class="badge">{{ $product->category }}</span>
             </div>
 
             @if($galleryPhotos->isNotEmpty())

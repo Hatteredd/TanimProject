@@ -32,7 +32,6 @@
 </div>
 
 <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem;margin:-.35rem 0 .8rem;">
-    <p style="margin:0;font-size:.75rem;color:var(--text-light);">Worksheet headings: <strong>name, category, description, price, unit, stock, farm_location, harvest_date, brand, type</strong></p>
     <p style="margin:0;font-size:.75rem;color:var(--text-light);">Total rows: <span id="datatable-count">{{ $products->count() }}</span></p>
 </div>
 

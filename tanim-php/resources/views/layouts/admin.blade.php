@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Admin') — Tanim Admin</title>
     <link href="https://fonts.bunny.net/css?family=outfit:400,500,600,700,800,900|dm-sans:400,500,600,700" rel="stylesheet">
     @if (file_exists(public_path('hot')) || file_exists(public_path('build/manifest.json')))

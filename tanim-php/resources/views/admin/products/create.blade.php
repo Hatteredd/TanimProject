@@ -4,7 +4,7 @@
 @section('content')
 <div style="max-width:42rem;">
 <div class="page-card" style="padding:1.75rem;">
-    <form method="POST" action="{{ route('admin.products.store') }}" enctype="multipart/form-data">
+            <form id="product-form" method="POST" action="{{ route('admin.products.store') }}" enctype="multipart/form-data">
         @csrf
         <div style="display:grid;gap:1rem;">
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
@@ -68,7 +68,7 @@
                     <p style="margin:0;font-weight:600;color:var(--text);">Drag photos here or click to select</p>
                     <p style="margin:.25rem 0 0;font-size:.75rem;color:var(--text-light);">You can select multiple photos at once (up to 3)</p>
                 </div>
-                <input id="photos-input-create" name="photos[]" type="file" class="input" accept="image/*" multiple style="display:none;" />
+                <input id="photos-input-create" type="file" class="input" accept="image/*" multiple style="display:none;" />
                 <div id="preview-create" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:.75rem;margin-top:1rem;"></div>
                 <p style="margin:.5rem 0 0;font-size:.72rem;color:var(--text-light);">Select up to 3 photos. The first photo will be used as primary when no product image is set.</p>
             </div>
@@ -80,28 +80,21 @@
         <div style="display:flex;gap:.75rem;margin-top:1.5rem;">
             <button type="submit" class="btn-primary" style="padding:.7rem 1.5rem;font-size:.875rem;border-radius:.75rem;">Create Product</button>
             <a href="{{ route('admin.products.index') }}" class="btn-ghost" style="padding:.7rem 1.25rem;font-size:.875rem;border-radius:.75rem;">Cancel</a>
-        </div>
-    </form>
+            </form>
 </div>
 </div>
 <script>
 const dropZone = document.getElementById('drop-zone-create');
 const fileInput = document.getElementById('photos-input-create');
 const preview = document.getElementById('preview-create');
+const form = document.getElementById('product-form');
 const maxFiles = 3;
-
-function handleFiles(files) {
-    if (files.length > maxFiles) {
-        alert(`Please select up to ${maxFiles} photos only.`);
-        return;
-    }
-    fileInput.files = files;
-    updatePreview(files);
-}
+let selectedFiles = [];
 
 function updatePreview(files) {
+    selectedFiles = Array.from(files).slice(0, maxFiles);
     preview.innerHTML = '';
-    Array.from(files).forEach((file, index) => {
+    selectedFiles.forEach((file, index) => {
         const reader = new FileReader();
         reader.onload = (e) => {
             const div = document.createElement('div');
@@ -136,9 +129,62 @@ dropZone.addEventListener('drop', (e) => {
     dropZone.style.borderColor = 'var(--border)';
     dropZone.style.backgroundColor = 'var(--bg-soft)';
     dropZone.style.opacity = '1';
-    handleFiles(e.dataTransfer.files);
+    
+    if (e.dataTransfer.files.length > maxFiles) {
+        alert(`You can only add up to ${maxFiles} gallery photos. You dropped ${e.dataTransfer.files.length} files.\n\nPlease try with up to ${maxFiles} photos.`);
+        return;
+    }
+    updatePreview(e.dataTransfer.files);
 });
 
-fileInput.addEventListener('change', (e) => updatePreview(e.target.files));
+fileInput.addEventListener('change', (e) => {
+    if (e.target.files.length > maxFiles) {
+        alert(`You can only add up to ${maxFiles} gallery photos. You selected ${e.target.files.length} files.\n\nPlease select up to ${maxFiles} photos and try again.`);
+        e.target.value = '';
+        selectedFiles = [];
+        preview.innerHTML = '';
+        return;
+    }
+    updatePreview(e.target.files);
+});
+
+form.addEventListener('submit', (e) => {
+    if (selectedFiles.length > 0) {
+        e.preventDefault();
+        
+        const formData = new FormData(form);
+        
+        // Remove old photos[] fields if any
+        formData.delete('photos[]');
+        
+        // Add selected files
+        selectedFiles.forEach(file => {
+            formData.append('photos[]', file);
+        });
+        
+        // Submit via fetch
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                window.location.href = '{{ route("admin.products.index") }}';
+            } else {
+                return response.text().then(html => {
+                    alert('Error creating product. Check console for details.');
+                    console.log(html);
+                });
+            }
+        })
+        .catch(err => {
+            console.error('Submit error:', err);
+            alert('Error creating product');
+        });
+    }
+});
 </script>
 @endsection
