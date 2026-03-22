@@ -6,6 +6,64 @@
 {{-- Chart.js CDN --}}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
 
+<form method="GET" class="glass" style="border-radius:1rem;padding:1rem;margin-bottom:1.25rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.75rem;align-items:end;">
+    <div>
+        <label style="display:block;font-size:.72rem;font-weight:700;color:var(--text-muted);margin-bottom:.35rem;">Report Type</label>
+        <select name="report_type" id="reportType" class="input" style="width:100%;">
+            <option value="all" {{ $reportType === 'all' ? 'selected' : '' }}>All Reports</option>
+            <option value="sales" {{ $reportType === 'sales' ? 'selected' : '' }}>Sales</option>
+            <option value="customers" {{ $reportType === 'customers' ? 'selected' : '' }}>Customers</option>
+            <option value="products" {{ $reportType === 'products' ? 'selected' : '' }}>Products</option>
+            <option value="orders" {{ $reportType === 'orders' ? 'selected' : '' }}>Orders</option>
+        </select>
+    </div>
+
+    <div>
+        <label style="display:block;font-size:.72rem;font-weight:700;color:var(--text-muted);margin-bottom:.35rem;">From Date</label>
+        <input type="date" name="from_date" value="{{ $fromDate->toDateString() }}" class="input" style="width:100%;" />
+    </div>
+
+    <div>
+        <label style="display:block;font-size:.72rem;font-weight:700;color:var(--text-muted);margin-bottom:.35rem;">To Date</label>
+        <input type="date" name="to_date" value="{{ $toDate->toDateString() }}" class="input" style="width:100%;" />
+    </div>
+
+    <div data-filter-group="orders sales all">
+        <label style="display:block;font-size:.72rem;font-weight:700;color:var(--text-muted);margin-bottom:.35rem;">Order Status</label>
+        <select name="status" class="input" style="width:100%;">
+            <option value="">All (except cancelled)</option>
+            @foreach($statuses as $status)
+            <option value="{{ $status }}" {{ $statusFilter === $status ? 'selected' : '' }}>{{ ucfirst($status) }}</option>
+            @endforeach
+        </select>
+    </div>
+
+    <div data-filter-group="products sales all orders">
+        <label style="display:block;font-size:.72rem;font-weight:700;color:var(--text-muted);margin-bottom:.35rem;">Product Category</label>
+        <select name="category" class="input" style="width:100%;">
+            <option value="">All Categories</option>
+            @foreach($availableCategories as $category)
+            <option value="{{ $category }}" {{ $categoryFilter === $category ? 'selected' : '' }}>{{ $category }}</option>
+            @endforeach
+        </select>
+    </div>
+
+    <div data-filter-group="customers all">
+        <label style="display:block;font-size:.72rem;font-weight:700;color:var(--text-muted);margin-bottom:.35rem;">Customer Role</label>
+        <select name="customer_role" class="input" style="width:100%;">
+            <option value="all" {{ $roleFilter === 'all' ? 'selected' : '' }}>All Roles</option>
+            <option value="buyer" {{ $roleFilter === 'buyer' ? 'selected' : '' }}>Buyer</option>
+            <option value="farmer" {{ $roleFilter === 'farmer' ? 'selected' : '' }}>Farmer</option>
+            <option value="admin" {{ $roleFilter === 'admin' ? 'selected' : '' }}>Admin</option>
+        </select>
+    </div>
+
+    <div style="display:flex;gap:.5rem;">
+        <button type="submit" class="btn-primary" style="padding:.62rem 1rem;font-size:.85rem;border-radius:.75rem;">Apply Filters</button>
+        <a href="{{ route('admin.reports') }}" class="btn-primary" style="padding:.62rem 1rem;font-size:.85rem;border-radius:.75rem;text-decoration:none;background:var(--bg);color:var(--text-muted);border:1px solid var(--border);">Reset</a>
+    </div>
+</form>
+
 {{-- Summary KPIs --}}
 <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;margin-bottom:2rem;">
 @foreach([
@@ -27,7 +85,7 @@
 
     <div class="glass" style="border-radius:1.25rem;padding:1.25rem;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
-            <h2 style="font-family:'Outfit',sans-serif;font-size:.95rem;font-weight:800;color:var(--text);margin:0;">📅 Monthly Sales — {{ $year }}</h2>
+            <h2 style="font-family:'Outfit',sans-serif;font-size:.95rem;font-weight:800;color:var(--text);margin:0;">📅 Sales Trend — {{ $fromDate->format('M d, Y') }} to {{ $toDate->format('M d, Y') }}</h2>
             <span style="font-size:.72rem;font-weight:700;color:var(--primary);">₱{{ number_format($totalRevenue,0) }} total</span>
         </div>
         <canvas id="monthlySalesChart" height="220"></canvas>
@@ -35,7 +93,7 @@
 
     <div class="glass" style="border-radius:1.25rem;padding:1.25rem;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
-            <h2 style="font-family:'Outfit',sans-serif;font-size:.95rem;font-weight:800;color:var(--text);margin:0;">👤 New Customers — {{ $year }}</h2>
+            <h2 style="font-family:'Outfit',sans-serif;font-size:.95rem;font-weight:800;color:var(--text);margin:0;">👤 New Customers — {{ $fromDate->format('M d') }} to {{ $toDate->format('M d, Y') }}</h2>
             <span style="font-size:.72rem;font-weight:700;color:var(--earth);">{{ $totalCustomers }} total</span>
         </div>
         <canvas id="customerRegChart" height="220"></canvas>
@@ -89,6 +147,28 @@
 
     const catLabels = @json($categorySales->pluck('category')->values());
     const catTotals = @json($categorySales->pluck('total')->map(fn($v) => round($v, 2))->values());
+
+    function syncReportFilterFields() {
+        const reportType = document.getElementById('reportType');
+        if (!reportType) return;
+
+        const current = reportType.value;
+        document.querySelectorAll('[data-filter-group]').forEach((group) => {
+            const allowed = (group.getAttribute('data-filter-group') || '').split(' ');
+            const show = allowed.includes(current);
+            group.style.display = show ? 'block' : 'none';
+
+            group.querySelectorAll('select,input').forEach((el) => {
+                el.disabled = !show;
+            });
+        });
+    }
+
+    const reportTypeInput = document.getElementById('reportType');
+    if (reportTypeInput) {
+        reportTypeInput.addEventListener('change', syncReportFilterFields);
+        syncReportFilterFields();
+    }
 
     const statusPalette = {
         pending:'#d97706', confirmed:'#2563eb', processing:'#7c3aed',
