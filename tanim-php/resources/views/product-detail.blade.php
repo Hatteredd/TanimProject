@@ -358,6 +358,12 @@
 
             {{-- Farm meta --}}
             <div class="pd-meta">
+                @if($product->supplier)
+                <div class="pd-meta-row">
+                    <span>🚚</span>
+                    <span>Supplier: <strong>{{ $product->supplier->name }}</strong></span>
+                </div>
+                @endif
                 @if($product->farm_location)
                 <div class="pd-meta-row">
                     <span>📍</span>

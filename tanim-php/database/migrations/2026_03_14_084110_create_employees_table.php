@@ -9,11 +9,9 @@ return new class extends Migration {
         Schema::create('employees', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('position');
-            $table->string('department')->default('Operations');
-            $table->decimal('base_salary', 10, 2); // monthly
-            $table->decimal('bonus', 10, 2)->default(0);
-            $table->date('hire_date');
+            $table->string('location', 200);
+            $table->string('specialty', 120)->nullable();
+            $table->string('contact_number', 30)->nullable();
             $table->string('status')->default('active'); // active, inactive
             $table->text('notes')->nullable();
             $table->timestamps();

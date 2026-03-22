@@ -25,13 +25,15 @@ class ProductController extends Controller
             ->orderBy('category')
             ->pluck('category');
 
-        $brands = Product::where('is_active', true)
-            ->whereNull('deleted_at')
-            ->whereNotNull('brand')
-            ->where('brand', '!=', '')
+        $brands = Product::query()
+            ->join('employees', 'employees.id', '=', 'products.supplier_id')
+            ->where('products.is_active', true)
+            ->whereNull('products.deleted_at')
+            ->where('products.stock', '>', 0)
+            ->select('employees.id', 'employees.name')
             ->distinct()
-            ->orderBy('brand')
-            ->pluck('brand');
+            ->orderBy('employees.name')
+            ->pluck('employees.name', 'employees.id');
 
         $types = Product::where('is_active', true)
             ->whereNull('deleted_at')
@@ -64,7 +66,7 @@ class ProductController extends Controller
                 $q->where('name', 'like', $term)
                     ->orWhere('description', 'like', $term)
                     ->orWhere('category', 'like', $term)
-                    ->orWhere('brand', 'like', $term)
+                    ->orWhereHas('supplier', fn (Builder $supplierQuery) => $supplierQuery->where('name', 'like', $term))
                     ->orWhere('type', 'like', $term);
             });
         }
@@ -85,13 +87,15 @@ class ProductController extends Controller
             ->distinct()
             ->orderBy('category')
             ->pluck('category');
-        $brands = Product::where('is_active', true)
-            ->whereNull('deleted_at')
-            ->whereNotNull('brand')
-            ->where('brand', '!=', '')
+        $brands = Product::query()
+            ->join('employees', 'employees.id', '=', 'products.supplier_id')
+            ->where('products.is_active', true)
+            ->whereNull('products.deleted_at')
+            ->where('products.stock', '>', 0)
+            ->select('employees.id', 'employees.name')
             ->distinct()
-            ->orderBy('brand')
-            ->pluck('brand');
+            ->orderBy('employees.name')
+            ->pluck('employees.name', 'employees.id');
         $types = Product::where('is_active', true)
             ->whereNull('deleted_at')
             ->whereNotNull('type')
@@ -105,7 +109,7 @@ class ProductController extends Controller
 
     public function show(Product $product)
     {
-        $product->load(['reviews.user', 'photos']);
+        $product->load(['reviews.user', 'photos', 'supplier']);
 
         $reviews = $product->reviews()->with('user')->latest()->get();
         $avgRating = round($reviews->avg('rating') ?? 0, 1);
@@ -137,7 +141,15 @@ class ProductController extends Controller
         }
 
         if ($request->filled('brand')) {
-            $query->where('brand', $request->brand);
+            $brandFilter = (string) $request->brand;
+            $query->where(function (Builder $filterQuery) use ($brandFilter) {
+                if (is_numeric($brandFilter)) {
+                    $filterQuery->where('supplier_id', (int) $brandFilter);
+                    return;
+                }
+
+                $filterQuery->whereHas('supplier', fn (Builder $supplierQuery) => $supplierQuery->where('name', $brandFilter));
+            });
         }
 
         if ($request->filled('type')) {
