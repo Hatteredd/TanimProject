@@ -9,18 +9,18 @@ class SuppliersSeeder extends Seeder
 {
     public function run(): void
     {
-        $suppliers = [
-            ['name' => 'Laguna Greens Cooperative', 'location' => 'Laguna, Luzon', 'specialty' => 'Leafy vegetables', 'contact_number' => '09171234567', 'status' => 'active'],
-            ['name' => 'Benguet Highland Farms', 'location' => 'Benguet, Cordillera', 'specialty' => 'Highland vegetables', 'contact_number' => '09182345678', 'status' => 'active'],
-            ['name' => 'Nueva Ecija Grain Hub', 'location' => 'Nueva Ecija, Central Luzon', 'specialty' => 'Rice and grains', 'contact_number' => '09193456789', 'status' => 'active'],
-            ['name' => 'Mindanao Tropics', 'location' => 'Davao del Sur, Mindanao', 'specialty' => 'Tropical fruits', 'contact_number' => '09204567890', 'status' => 'active'],
-            ['name' => 'Visayas Orchard Group', 'location' => 'Guimaras, Western Visayas', 'specialty' => 'Mangoes and citrus', 'contact_number' => '09215678901', 'status' => 'active'],
-        ];
+        $faker = fake();
+        $specialties = ['Leafy vegetables', 'Highland vegetables', 'Rice and grains', 'Tropical fruits', 'Root crops'];
 
-        foreach ($suppliers as $supplier) {
+        for ($i = 0; $i < 8; $i++) {
             Employee::updateOrCreate(
-                ['name' => $supplier['name']],
-                $supplier
+                ['name' => $faker->unique()->company()],
+                [
+                    'location' => $faker->city() . ', ' . $faker->state(),
+                    'specialty' => $faker->randomElement($specialties),
+                    'contact_number' => '09' . $faker->numerify('#########'),
+                    'status' => 'active',
+                ]
             );
         }
     }

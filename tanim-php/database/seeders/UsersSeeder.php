@@ -46,19 +46,13 @@ class UsersSeeder extends Seeder
             'email_verified_at' => $customer->email_verified_at ?: now(),
         ])->save();
 
-        $buyers = [
-            ['name' => 'John Llegado', 'email' => 'johnllegado20@gmail.com'],
-            ['name' => 'Maria Santos', 'email' => 'buyer1@tanim.ph'],
-            ['name' => 'Pedro Reyes', 'email' => 'buyer2@tanim.ph'],
-            ['name' => 'Ana Buencamino', 'email' => 'buyer3@tanim.ph'],
-            ['name' => 'Maria Santos Demo', 'email' => 'buyer@tanim.ph'],
-        ];
+        $faker = fake();
 
-        foreach ($buyers as $buyer) {
+        for ($i = 0; $i < 10; $i++) {
             $user = User::firstOrCreate(
-                ['email' => $buyer['email']],
+                ['email' => $faker->unique()->safeEmail()],
                 [
-                    'name' => $buyer['name'],
+                    'name' => $faker->name(),
                     'role' => 'buyer',
                     'password' => Hash::make('password'),
                     'is_active' => true,
