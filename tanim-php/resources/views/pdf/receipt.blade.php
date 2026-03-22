@@ -166,17 +166,21 @@
         </table>
 
         <table class="totals">
+            @php
+                $subtotal = ($order->total_amount - 100) / 1.12;
+                $tax = $subtotal * 0.12;
+            @endphp
             <tr>
                 <td class="t-right" style="width:78%;">Subtotal</td>
-                <td class="t-right" style="width:22%;">{{ number_format($order->total_amount - 100, 2) }}</td>
+                <td class="t-right" style="width:22%;">{{ number_format($subtotal, 2) }}</td>
+            </tr>
+            <tr>
+                <td class="t-right">VAT (12%)</td>
+                <td class="t-right">{{ number_format($tax, 2) }}</td>
             </tr>
             <tr>
                 <td class="t-right">Shipping Fee</td>
                 <td class="t-right">100.00</td>
-            </tr>
-            <tr>
-                <td class="t-right">Tax</td>
-                <td class="t-right">0.00</td>
             </tr>
             <tr class="grand">
                 <td class="t-right">TOTAL AMOUNT</td>

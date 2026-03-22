@@ -56,6 +56,10 @@
                 <span style="font-size:0.875rem;font-weight:700;color:var(--text);">₱{{ number_format($subtotal, 2) }}</span>
             </div>
             <div style="display:flex;justify-content:space-between;align-items:center;padding:0.6rem 0;border-bottom:1px solid var(--border);">
+                <span style="font-size:0.875rem;color:var(--text-muted);">VAT (12%)</span>
+                <span style="font-size:0.875rem;font-weight:700;color:var(--text);">₱{{ number_format($tax, 2) }}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:0.6rem 0;border-bottom:1px solid var(--border);">
                 <span style="font-size:0.875rem;color:var(--text-muted);">Shipping Fee</span>
                 <span style="font-size:0.875rem;font-weight:700;color:var(--text);">₱{{ number_format($shipping_fee, 2) }}</span>
             </div>

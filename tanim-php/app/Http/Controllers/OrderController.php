@@ -48,10 +48,11 @@ class OrderController extends Controller
         }
 
         $subtotal = $cartItems->sum(fn($i) => $i->quantity * $i->product->price);
+        $tax = $subtotal * 0.12;
         $shipping_fee = 100;
-        $total = $subtotal + $shipping_fee;
+        $total = $subtotal + $tax + $shipping_fee;
 
-        return view('orders.checkout', compact('cartItems', 'subtotal', 'shipping_fee', 'total'));
+        return view('orders.checkout', compact('cartItems', 'subtotal', 'tax', 'shipping_fee', 'total'));
     }
 
     public function store(Request $request)
@@ -79,8 +80,9 @@ class OrderController extends Controller
                 }
 
                 $subtotal = $cartItems->sum(fn($i) => $i->quantity * $i->product->price);
+                $tax = $subtotal * 0.12;
                 $shipping_fee = 100;
-                $totalAmount = $subtotal + $shipping_fee;
+                $totalAmount = $subtotal + $tax + $shipping_fee;
 
                 $order = Order::create([
                     'user_id'          => Auth::id(),
