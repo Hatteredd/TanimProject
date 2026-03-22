@@ -295,47 +295,42 @@
     </div>
 
     <div class="pd-grid">
-    <div class="pd-grid">
 
-        {{-- Image --}}
-        <div style="position:relative;">
-            @php
-                $galleryPhotos = $product->photos;
-                $mainPhoto = $galleryPhotos->firstWhere('is_primary', true) ?? $galleryPhotos->first();
-            @endphp
-            <div class="pd-image">
-                @php $icons = ['Vegetables'=>'🥦','Fruits'=>'🍓','Grains & Rice'=>'🌾','Root Crops'=>'🥔','Herbs & Spices'=>'🌿']; @endphp
+        {{-- Left: Image Gallery --}}
+        <div>
+            <div class="pd-image-box" id="mainImageBox">
+                @php
+                    $galleryPhotos = $product->photos;
+                    $mainPhoto = $galleryPhotos->firstWhere('is_primary', true) ?? $galleryPhotos->first();
+                    $mainUrl = $mainPhoto ? $mainPhoto->url() : ($product->primaryPhoto() ?: asset('images/placeholder.png'));
+                @endphp
+                
                 @if($mainPhoto || $product->primaryPhoto())
-                    <img id="main-product-image" src="{{ $mainPhoto ? asset('storage/'.$mainPhoto->path) : $product->primaryPhoto() }}" alt="{{ $product->name }}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;z-index:0;" />
+                    <img src="{{ $mainUrl }}" alt="{{ $product->name }}" class="pd-main-img" id="mainImg" style="transition: opacity 0.3s ease-in-out;" />
                 @else
-                    {{ $icons[$product->category] ?? '🛒' }}
+                    <div style="font-size:8rem;">🌿</div>
                 @endif
             </div>
-            <div class="pd-category-badge">
-                <span class="badge">{{ $product->category }}</span>
-            </div>
 
-            @if($galleryPhotos->isNotEmpty())
+            @if($galleryPhotos->count() > 1)
             <div class="pd-thumb-grid">
                 @foreach($galleryPhotos as $photo)
-                <img
-                    src="{{ asset('storage/'.$photo->path) }}"
-                    alt="{{ $product->name }} photo {{ $loop->iteration }}"
-                    class="pd-thumb {{ ($mainPhoto && $mainPhoto->id === $photo->id) ? 'active' : '' }}"
-                    data-photo-src="{{ asset('storage/'.$photo->path) }}"
-                />
+                <img src="{{ $photo->url() }}" 
+                     alt="{{ $product->name }} view {{ $loop->iteration }}"
+                     class="pd-thumb {{ ($mainPhoto && $mainPhoto->id === $photo->id) ? 'active' : '' }}" 
+                     onclick="switchImg(this, '{{ $photo->url() }}')" />
                 @endforeach
             </div>
             @endif
-
-            {{-- Stock status --}}
-            <div style="margin-top:1rem;text-align:center;">
+            
+            {{-- Stock status badge below gallery --}}
+            <div style="margin-top:1.5rem; text-align:center;">
                 @if($product->stock <= 0)
-                    <span style="background:#fee2e2;color:#dc2626;padding:0.4rem 1rem;border-radius:9999px;font-size:0.8rem;font-weight:700;">⚠ Out of Stock</span>
-                @elseif($product->stock <= 15)
-                    <span style="background:#fef3c7;color:#92400e;padding:0.4rem 1rem;border-radius:9999px;font-size:0.8rem;font-weight:700;">⚠ Only {{ $product->stock }} left</span>
+                    <span class="badge badge-danger" style="padding:0.5rem 1.25rem; font-size:0.8rem;">Out of Stock</span>
+                @elseif($product->stock <= 10)
+                    <span class="badge badge-wheat" style="padding:0.5rem 1.25rem; font-size:0.8rem;">Only {{ $product->stock }} left in stock</span>
                 @else
-                    <span style="background:var(--primary-soft);color:var(--primary-text);padding:0.4rem 1rem;border-radius:9999px;font-size:0.8rem;font-weight:700;">✓ In Stock ({{ $product->stock }} available)</span>
+                    <span class="badge" style="padding:0.5rem 1.25rem; font-size:0.8rem;">{{ $product->stock }} {{ $product->unit }}s available</span>
                 @endif
             </div>
         </div>

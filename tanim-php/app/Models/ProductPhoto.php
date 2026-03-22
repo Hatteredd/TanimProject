@@ -18,6 +18,9 @@ class ProductPhoto extends Model
 
     public function url(): string
     {
+        if (str_starts_with($this->path, 'http')) {
+            return $this->path;
+        }
         return asset('storage/' . $this->path);
     }
 }

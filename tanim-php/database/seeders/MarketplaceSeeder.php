@@ -210,6 +210,24 @@ class MarketplaceSeeder extends Seeder
                 'is_active' => true,
             ]));
 
+            // Add 3 different pictures for each product as requested
+            $categories = [
+                'Plants & Seeds' => 'nature',
+                'Vegetables' => 'vegetables',
+                'Fruits' => 'fruits'
+            ];
+            $keyword = $categories[$pData['category']] ?? 'farm';
+            
+            for ($i = 1; $i <= 3; $i++) {
+                \App\Models\ProductPhoto::create([
+                    'product_id' => $product->id,
+                    // Use different random images from picsum.photos for each photo
+                    'path' => "https://picsum.photos/seed/" . md5($product->name . $i) . "/800/600",
+                    'is_primary' => $i === 1,
+                    'sort_order' => $i,
+                ]);
+            }
+
             if ($buyers->isNotEmpty()) {
                 foreach ($buyers->shuffle()->take(2) as $buyer) {
                     Review::create([
