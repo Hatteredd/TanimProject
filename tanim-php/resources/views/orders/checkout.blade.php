@@ -26,8 +26,7 @@
                     <label class="label">Contact Number *</label>
                     <input type="tel" name="contact_number" value="{{ old('contact_number') }}" required class="input"
                         inputmode="numeric" pattern="^(?:\+63|0)9\d{9}$"
-                        title="Use 11-digit PH mobile (09171234567) or +63 format (+639171234567)."
-                        placeholder="09171234567 or +639171234567" />
+                        title="Use 11-digit PH mobile (09171234567) or +63 format (+639171234567)." />
                 </div>
 
                 <div>

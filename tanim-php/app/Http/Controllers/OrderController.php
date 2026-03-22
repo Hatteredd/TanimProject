@@ -61,7 +61,7 @@ class OrderController extends Controller
             'contact_number'   => ['required', 'string', 'regex:/^(?:\+63|0)9\d{9}$/'],
             'notes'            => ['nullable', 'string', 'max:500'],
         ], [
-            'contact_number.regex' => 'Please enter a valid Philippine mobile number (e.g., 09171234567 or +639171234567).',
+            'contact_number.regex' => 'Please enter a valid Philippine mobile number.',
         ]);
 
         $validated['contact_number'] = preg_replace('/\s+|-/', '', $validated['contact_number']);
