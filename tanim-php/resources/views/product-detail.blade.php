@@ -34,134 +34,144 @@
 @media(max-width:768px) { .pd-grid { grid-template-columns: 1fr; } }
 
 /* Image/Icon panel */
-.pd-image {
+.pd-image-box {
     border-radius: 1.5rem;
-    background: linear-gradient(135deg, var(--primary-soft) 0%, var(--primary-faint) 100%);
+    background: var(--bg-card);
+    border: 1px solid var(--border-card);
     display: flex; align-items: center; justify-content: center;
-    font-size: 8rem; min-height: 340px;
-    box-shadow: var(--shadow-neu);
+    min-height: 450px;
+    box-shadow: var(--shadow-card);
     position: relative; overflow: hidden;
+    transition: all var(--transition-base);
 }
-.pd-image::before {
-    content: '';
-    position: absolute; inset: 0;
-    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.3), transparent 60%);
+.pd-image-box:hover {
+    box-shadow: var(--shadow-hover);
+    border-color: var(--border-glass);
 }
-.pd-category-badge {
-    margin-bottom: 1rem;
-    display: inline-block;
+.pd-main-img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transition: transform var(--transition-slow);
+}
+.pd-image-box:hover .pd-main-img {
+    transform: scale(1.03);
 }
 
 .pd-thumb-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(68px, 1fr));
-    gap: 0.55rem;
-    margin-top: 0.85rem;
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1rem;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
 }
 
 .pd-thumb {
-    width: 100%;
-    height: 68px;
-    border-radius: 0.65rem;
+    width: 80px;
+    height: 80px;
+    border-radius: 0.75rem;
     object-fit: cover;
-    border: 2px solid var(--border);
+    border: 2px solid transparent;
     cursor: pointer;
-    transition: border-color .15s, transform .15s;
-    background: var(--bg);
+    transition: all var(--transition-fast);
+    background: var(--bg-card);
+    flex-shrink: 0;
 }
 
 .pd-thumb.active {
     border-color: var(--primary);
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-neu-sm);
 }
 
 /* Info panel */
 .pd-info-card {
-    background: var(--bg-glass);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
-    border: 1px solid var(--border);
+    background: var(--bg-card);
+    border: 1px solid var(--border-card);
     border-radius: 1.5rem;
-    padding: 2rem;
-    box-shadow: var(--shadow-neu);
+    padding: 2.5rem;
+    box-shadow: var(--shadow-card);
 }
 
 .pd-title {
     font-family: 'Outfit', sans-serif;
-    font-size: 2rem; font-weight: 900;
+    font-size: 2.25rem; font-weight: 900;
     color: var(--text);
-    margin: 0 0 0.75rem;
-    line-height: 1.2;
+    margin: 0 0 1rem;
+    line-height: 1.1;
 }
 
 /* Rating row */
 .rating-row {
-    display: flex; align-items: center; gap: 0.6rem;
-    margin-bottom: 1.5rem;
+    display: flex; align-items: center; gap: 0.75rem;
+    margin-bottom: 1.75rem;
 }
-.rating-stars { display: flex; gap: 2px; }
-.rating-score { font-weight: 800; color: var(--text); font-size: 0.9rem; }
-.rating-count { color: var(--text-muted); font-size: 0.8rem; }
+.rating-stars { display: flex; gap: 3px; color: var(--accent); }
+.rating-score { font-weight: 800; color: var(--text); font-size: 1rem; }
+.rating-count { color: var(--text-muted); font-size: 0.85rem; }
 
 /* Farm meta */
 .pd-meta {
-    display: flex; flex-direction: column; gap: 0.6rem;
-    padding: 1rem 1.25rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    padding: 1.25rem;
     background: var(--primary-faint);
-    border: 1px solid var(--border);
+    border: 1px solid rgba(46,139,46,0.1);
     border-radius: 1rem;
-    margin-bottom: 1.5rem;
+    margin-bottom: 2rem;
 }
-.pd-meta-row {
-    display: flex; align-items: center; gap: 0.6rem;
-    font-size: 0.875rem; color: var(--text-muted);
+.pd-meta-item {
+    display: flex; flex-direction: column; gap: 0.25rem;
 }
-.pd-meta-row strong { color: var(--text); }
+.pd-meta-label { font-size: 0.7rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.05em; }
+.pd-meta-value { font-size: 0.9rem; font-weight: 600; color: var(--text); }
 
 .pd-desc {
-    font-size: 0.95rem; color: var(--text-muted);
-    line-height: 1.8; margin-bottom: 1.75rem;
+    font-size: 1rem; color: var(--text-muted);
+    line-height: 1.7; margin-bottom: 2rem;
 }
 
 /* Price display */
-.pd-price-row {
-    display: flex; align-items: baseline; gap: 0.4rem;
-    margin-bottom: 1.5rem;
+.pd-price-section {
+    padding: 1.5rem 0;
+    border-top: 1px solid var(--border);
+    margin-bottom: 2rem;
 }
-.pd-price-base { font-family: 'Outfit', sans-serif; font-size: 2.2rem; font-weight: 900; color: var(--primary); }
-.pd-price-unit { font-size: 0.9rem; color: var(--text-muted); }
+.pd-price-row {
+    display: flex; align-items: baseline; gap: 0.5rem;
+}
+.pd-price-base { font-family: 'Outfit', sans-serif; font-size: 2.5rem; font-weight: 900; color: var(--text); }
+.pd-price-unit { font-size: 1rem; color: var(--text-muted); font-weight: 500; }
 .pd-price-total {
-    font-size: 0.85rem; font-weight: 700;
-    color: var(--text-muted);
-    margin-left: 0.5rem;
+    font-size: 0.9rem; font-weight: 700;
+    color: var(--primary);
+    margin-top: 0.5rem;
 }
 
 /* Quantity selector */
 .qty-row {
-    display: flex; align-items: center; gap: 1rem;
-    margin-bottom: 1.5rem; flex-wrap: wrap;
+    display: flex; align-items: center; gap: 1.5rem;
+    margin-bottom: 2rem;
 }
-.qty-label { font-size: 0.875rem; font-weight: 700; color: var(--text); }
 .qty-control {
     display: flex; align-items: center;
-    background: var(--bg);
-    border: 1.5px solid var(--border);
-    border-radius: 0.85rem;
-    box-shadow: var(--shadow-neu-inset);
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
     overflow: hidden;
 }
 .qty-btn {
-    width: 2.5rem; height: 2.5rem;
+    width: 3rem; height: 3rem;
     border: none; background: transparent; cursor: pointer;
-    font-size: 1.1rem; color: var(--text-muted);
-    transition: background 0.15s, color 0.15s;
+    font-size: 1.25rem; color: var(--text);
+    transition: all var(--transition-fast);
     display: flex; align-items: center; justify-content: center;
 }
 .qty-btn:hover { background: var(--primary-faint); color: var(--primary); }
 .qty-input {
-    width: 3.5rem; text-align: center;
+    width: 4rem; text-align: center;
     border: none; background: transparent;
-    font-size: 1rem; font-weight: 800; color: var(--text);
+    font-size: 1.1rem; font-weight: 800; color: var(--text);
     outline: none;
 }
 .qty-stock { font-size: 0.78rem; color: var(--text-light); }
@@ -276,26 +286,15 @@
 @endauth
 
 <div class="pd-container">
-
-    {{-- Breadcrumb --}}
-    <nav class="breadcrumb" aria-label="breadcrumb">
+    <div class="breadcrumb">
         <a href="{{ route('home') }}">Home</a>
-        <span class="breadcrumb-sep">›</span>
+        <span class="breadcrumb-sep">/</span>
         <a href="{{ route('marketplace') }}">Marketplace</a>
-        <span class="breadcrumb-sep">›</span>
-        <a href="{{ route('marketplace', ['category' => $product->category]) }}">{{ $product->category }}</a>
-        <span class="breadcrumb-sep">›</span>
-        <span style="color:var(--text);font-weight:600;">{{ $product->name }}</span>
-    </nav>
-
-    {{-- Flash message --}}
-    @if(session('cart_success'))
-    <div style="background:var(--primary-soft);border:1px solid var(--primary);border-radius:0.85rem;padding:0.75rem 1.25rem;margin-bottom:1.5rem;font-size:0.875rem;font-weight:700;color:var(--primary-text);">
-        ✓ {{ session('cart_success') }}
+        <span class="breadcrumb-sep">/</span>
+        <span>{{ $product->name }}</span>
     </div>
-    @endif
 
-    {{-- ── MAIN PRODUCT GRID ── --}}
+    <div class="pd-grid">
     <div class="pd-grid">
 
         {{-- Image --}}

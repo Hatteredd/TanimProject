@@ -38,38 +38,7 @@
                    onmouseover="this.style.background='rgba(212,168,67,0.25)'" onmouseout="this.style.background='rgba(212,168,67,0.15)'">🌱 Join as a Farmer</a>
             </div>
 
-            {{-- Home Search (Laravel Scout) --}}
-            <form method="GET" action="{{ route('home') }}" style="display:grid;gap:.65rem;background:rgba(15,30,15,.45);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.16);border-radius:1rem;padding:.9rem;margin-bottom:1.25rem;">
-                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:.55rem;">
-                    <input name="q" type="text" value="{{ request('q') }}" placeholder="Search products (Scout)..." class="input" style="background:rgba(255,255,255,.95);" />
-                    <select name="category" class="input" style="background:rgba(255,255,255,.95);">
-                        <option value="">All Categories</option>
-                        @foreach($categories as $cat)
-                        <option value="{{ $cat }}" {{ request('category') === $cat ? 'selected' : '' }}>{{ $cat }}</option>
-                        @endforeach
-                    </select>
-                    <select name="brand" class="input" style="background:rgba(255,255,255,.95);">
-                        <option value="">All Brands</option>
-                        @foreach($brands as $brandId => $brandName)
-                        <option value="{{ $brandId }}" {{ (string) request('brand') === (string) $brandId ? 'selected' : '' }}>{{ $brandName }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.55rem;">
-                    <select name="type" class="input" style="background:rgba(255,255,255,.95);">
-                        <option value="">All Types</option>
-                        @foreach($types as $type)
-                        <option value="{{ $type }}" {{ request('type') === $type ? 'selected' : '' }}>{{ $type }}</option>
-                        @endforeach
-                    </select>
-                    <input name="min_price" type="number" min="0" step="0.01" value="{{ request('min_price') }}" placeholder="Min Price" class="input" style="background:rgba(255,255,255,.95);" />
-                    <input name="max_price" type="number" min="0" step="0.01" value="{{ request('max_price') }}" placeholder="Max Price" class="input" style="background:rgba(255,255,255,.95);" />
-                    <button type="submit" class="btn-primary" style="padding:.75rem 1.25rem;border-radius:.7rem;">Search</button>
-                    @if(request()->hasAny(['q','category','brand','type','min_price','max_price']))
-                    <a href="{{ route('home') }}" style="display:inline-flex;align-items:center;justify-content:center;padding:.75rem 1rem;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.25);color:#f5f0e8;font-size:.85rem;font-weight:700;border-radius:.7rem;text-decoration:none;">Clear</a>
-                    @endif
-                </div>
-            </form>
+
 
             {{-- Feature pills --}}
             <div style="display:flex;flex-wrap:wrap;gap:0.65rem;">
@@ -89,97 +58,102 @@
 </section>
 
 @if($searchResults)
-<section style="padding:4rem 0;background:var(--bg);border-top:1px solid var(--border);">
-<div style="max-width:80rem;margin:0 auto;padding:0 1.5rem;">
-    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:1.5rem;gap:1rem;flex-wrap:wrap;">
+<section style="padding:5rem 0;background:var(--bg);border-top:1px solid var(--border);">
+<div class="page-wrap">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:2.5rem;gap:1rem;flex-wrap:wrap;">
         <div>
-            <span class="badge-wheat" style="margin-bottom:.55rem;display:inline-block;">Scout Search</span>
-            <h2 style="font-family:Outfit,sans-serif;font-size:1.9rem;font-weight:800;color:var(--text);margin:0;">Search Results</h2>
-            <p style="font-size:.9rem;color:var(--text-muted);margin:.3rem 0 0;">Found {{ $searchResults->total() }} product(s) for "{{ request('q') }}"</p>
+            <span class="badge-wheat" style="margin-bottom:.75rem;display:inline-block;">Scout Search</span>
+            <h2 class="section-title" style="margin:0;">Search Results</h2>
+            <p style="font-size:.95rem;color:var(--text-muted);margin:.3rem 0 0;">Found {{ $searchResults->total() }} product(s) for "{{ request('q') }}"</p>
         </div>
     </div>
 
     @if($searchResults->isEmpty())
-    <div style="text-align:center;padding:2.5rem 0;color:var(--text-muted);">No products matched your Scout search and filters.</div>
+    <div class="page-card" style="text-align:center;padding:4rem 2rem;color:var(--text-muted);">
+        <div style="font-size:3rem;margin-bottom:1rem;">🔍</div>
+        <p>No products matched your search and filters. Try adjusting your keywords.</p>
+    </div>
     @else
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:1.25rem;">
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1.5rem;">
         @foreach($searchResults as $product)
-        <div class="product-card">
-            <a href="{{ route('products.show', $product) }}" style="display:block;text-decoration:none;">
-                @php $icons = ['Vegetables'=>'🥦','Fruits'=>'🍓','Grains & Rice'=>'🌾','Root Crops'=>'🥔','Herbs & Spices'=>'🌿']; @endphp
-                <div class="product-card-img" style="height:140px;">
-                    @if($product->primaryPhoto())
-                        <img src="{{ $product->primaryPhoto() }}" alt="{{ $product->name }}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;display:block;z-index:0;" />
-                    @else
-                        <span style="font-size:3rem;position:relative;z-index:1;">{{ $icons[$product->category] ?? '🛒' }}</span>
-                    @endif
+        <div class="product-card animate-fade-in" style="animation-delay: {{ $loop->index * 50 }}ms">
+            <a href="{{ route('products.show', $product) }}" class="product-card-img">
+                @if($product->primaryPhoto())
+                    <img src="{{ $product->primaryPhoto() }}" alt="{{ $product->name }}" loading="lazy" />
+                @else
+                    <div style="font-size:3.5rem;">🌿</div>
+                @endif
+                <div style="position:absolute;top:0.75rem;left:0.75rem;z-index:10;">
+                    <span class="badge">{{ $product->category }}</span>
                 </div>
             </a>
-            <div style="padding:.9rem;">
-                <span class="badge" style="font-size:.65rem;">{{ strtoupper($product->category) }}</span>
-                <h3 style="font-size:.95rem;font-weight:700;color:var(--text);margin:.5rem 0 .2rem;">{{ $product->name }}</h3>
-                <p style="font-size:.74rem;color:var(--text-muted);margin:0 0 .45rem;">
-                    {{ $product->brand ?: 'No Brand' }} · {{ $product->type ?: 'No Type' }}
-                </p>
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-top:.55rem;">
-                    <div>
-                        <span style="font-size:1.1rem;font-weight:800;color:var(--primary);">&#8369;{{ number_format($product->price, 2) }}</span>
-                        <span style="font-size:.7rem;color:var(--text-light);">/{{ $product->unit }}</span>
-                    </div>
+            <div style="padding:1.25rem;">
+                <h3 style="font-size:1.05rem;font-weight:800;color:var(--text);margin:0 0 0.5rem;line-height:1.3;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;">{{ $product->name }}</h3>
+                <p style="font-size:0.75rem;color:var(--text-muted);margin:0 0 0.75rem;">{{ $product->brand ?: 'Local Farm' }} · {{ $product->type ?: 'Fresh' }}</p>
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <span style="font-size:1.25rem;font-weight:900;color:var(--primary);">&#8369;{{ number_format($product->price, 2) }}</span>
+                    <span style="font-size:0.8rem;color:var(--text-muted);">/{{ $product->unit }}</span>
                 </div>
             </div>
         </div>
         @endforeach
     </div>
-    <div style="margin-top:1.25rem;display:flex;justify-content:center;">{{ $searchResults->links() }}</div>
+    <div style="margin-top:2.5rem;display:flex;justify-content:center;">{{ $searchResults->links() }}</div>
     @endif
 </div>
 </section>
 @endif
 
 {{-- ── FEATURED PRODUCE ──────────────────────────────── --}}
-<section style="padding:5rem 0;background:var(--bg);position:relative;overflow:hidden;">
+<section style="padding:6rem 0;background:var(--bg);position:relative;overflow:hidden;">
 {{-- Decorative leaf --}}
-<div style="position:absolute;top:-2rem;left:-2rem;font-size:10rem;opacity:0.04;pointer-events:none;transform:rotate(-20deg);">🍃</div>
-<div style="max-width:80rem;margin:0 auto;padding:0 1.5rem;">
-    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:2.5rem;flex-wrap:wrap;gap:1rem;">
+<div style="position:absolute;top:-2rem;left:-2rem;font-size:12rem;opacity:0.04;pointer-events:none;transform:rotate(-20deg);">🍃</div>
+<div class="page-wrap">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:3rem;flex-wrap:wrap;gap:1.5rem;">
         <div>
             <span class="badge-wheat" style="margin-bottom:0.75rem;display:inline-block;">🌾 Fresh Today</span>
-            <h2 style="font-family:Outfit,sans-serif;font-size:2.2rem;font-weight:800;color:var(--text);margin:0;">Featured Harvest</h2>
-            <p style="font-size:0.95rem;color:var(--text-muted);margin:0.3rem 0 0;">Straight from Filipino farms to your cart</p>
+            <h2 class="section-title" style="margin:0;">Featured Harvest</h2>
+            <p style="font-size:1rem;color:var(--text-muted);margin:0.4rem 0 0;">Hand-picked premium produce straight from our local farms</p>
         </div>
-        <a href="{{ route('marketplace') }}" class="btn-ghost" style="padding:0.5rem 1.25rem;font-size:0.875rem;border-radius:0.75rem;">View All →</a>
+        <a href="{{ route('marketplace') }}" class="btn-ghost">View All Harvest →</a>
     </div>
 
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:1.25rem;">
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1.75rem;">
         @foreach($featured as $product)
-        <div class="product-card">
-            <a href="{{ route('products.show', $product) }}" style="display:block;text-decoration:none;">
-                @php $icons = ['Vegetables'=>'🥦','Fruits'=>'🍓','Grains & Rice'=>'🌾','Root Crops'=>'🥔','Herbs & Spices'=>'🌿']; @endphp
-                <div class="product-card-img" style="height:140px;">
-                    @if($product->primaryPhoto())
-                        <img src="{{ $product->primaryPhoto() }}" alt="{{ $product->name }}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;display:block;z-index:0;" />
-                    @else
-                        <span style="font-size:3rem;position:relative;z-index:1;">{{ $icons[$product->category] ?? '🛒' }}</span>
-                    @endif
+        <div class="product-card animate-fade-in" style="animation-delay: {{ $loop->index * 100 }}ms">
+            <a href="{{ route('products.show', $product) }}" class="product-card-img">
+                @if($product->primaryPhoto())
+                    <img src="{{ $product->primaryPhoto() }}" alt="{{ $product->name }}" loading="lazy" />
+                @else
+                    <div style="font-size:3.5rem;">🌿</div>
+                @endif
+                <div style="position:absolute;top:0.75rem;left:0.75rem;z-index:10;">
+                    <span class="badge">{{ $product->category }}</span>
                 </div>
             </a>
-            <div style="padding:0.9rem;">
-                <span class="badge" style="font-size:0.65rem;">{{ strtoupper($product->category) }}</span>
-                <h3 style="font-size:0.95rem;font-weight:700;color:var(--text);margin:0.5rem 0 0.2rem;">{{ $product->name }}</h3>
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-top:0.6rem;">
+            <div style="padding:1.25rem;">
+                <a href="{{ route('products.show', $product) }}" style="text-decoration:none;">
+                    <h3 style="font-size:1.1rem;font-weight:800;color:var(--text);margin:0 0 0.5rem;line-height:1.3;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;">{{ $product->name }}</h3>
+                </a>
+                
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;">
                     <div>
-                        <span style="font-size:1.1rem;font-weight:800;color:var(--primary);">&#8369;{{ number_format($product->price, 2) }}</span>
-                        <span style="font-size:0.7rem;color:var(--text-light);">/{{ $product->unit }}</span>
+                        <span style="font-size:1.25rem;font-weight:900;color:var(--text);">&#8369;{{ number_format($product->price, 2) }}</span>
+                        <span style="font-size:0.8rem;color:var(--text-muted);">/{{ $product->unit }}</span>
                     </div>
                 </div>
+
                 @auth
-                <form method="POST" action="{{ route('cart.add', $product) }}" style="margin-top:0.75rem;">
-                    @csrf<input type="hidden" name="quantity" value="1"/>
-                    <button type="submit" class="btn-primary" style="width:100%;padding:0.55rem;font-size:0.8rem;border-radius:0.55rem;">&#128722; Add to Cart</button>
-                </form>
+                    @if(Auth::user()->role !== 'admin')
+                    <form method="POST" action="{{ route('cart.add', $product) }}">
+                        @csrf<input type="hidden" name="quantity" value="1"/>
+                        <button type="submit" class="btn-primary" style="width:100%;padding:0.75rem;font-size:0.875rem;">Add to Cart</button>
+                    </form>
+                    @else
+                    <a href="{{ route('admin.products.edit', $product) }}" class="btn-ghost" style="width:100%;padding:0.75rem;font-size:0.875rem;">Edit Product</a>
+                    @endif
                 @else
-                <a href="{{ route('login') }}" class="btn-ghost" style="display:block;margin-top:0.75rem;text-align:center;padding:0.55rem;font-size:0.8rem;border-radius:0.55rem;">Login to Buy</a>
+                <a href="{{ route('login') }}" class="btn-ghost" style="width:100%;padding:0.75rem;font-size:0.875rem;">Login to Buy</a>
                 @endauth
             </div>
         </div>

@@ -14,7 +14,12 @@
         @endphp
         <style>{!! $fallbackCss !!}</style>
     @endif
-    <script>(function(){const s=localStorage.getItem('tanim-theme');if(s==='dark'||(!s&&window.matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.classList.add('dark')})();</script>
+    <script>
+        (function() {
+            const theme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            if (theme === 'dark') document.documentElement.classList.add('dark');
+        })();
+    </script>
     <style>
     /* ── Shell ── */
     .admin-shell { display:flex; min-height:100vh; background:var(--bg); }
@@ -192,6 +197,11 @@
                 <p style="font-size:.7rem;color:var(--text-muted);margin:0;">{{ now()->format('l, F d, Y') }}</p>
             </div>
             <div style="display:flex;align-items:center;gap:.6rem;">
+                {{-- Theme Toggle --}}
+                <button onclick="toggleTheme()" class="btn-ghost" style="width:2rem;height:2rem;padding:0;border-radius:9999px;display:flex;align-items:center;justify-content:center;font-size:1rem;background:var(--bg-2);border:1px solid var(--border);" title="Toggle Theme">
+                    <span id="theme-icon-sun" style="display:none;">☀️</span>
+                    <span id="theme-icon-moon" style="display:none;">🌙</span>
+                </button>
                 {{-- Quick stats in topbar --}}
                 @php
                     $pendingOrders = \App\Models\Order::where('status','pending')->count();
@@ -226,8 +236,20 @@
 </div>
 
 <script>
-function toggleTheme(){const d=document.documentElement.classList.toggle('dark');localStorage.setItem('tanim-theme',d?'dark':'light');document.getElementById('icon-sun').style.display=d?'none':'block';document.getElementById('icon-moon').style.display=d?'block':'none';}
-document.addEventListener('DOMContentLoaded',function(){const d=document.documentElement.classList.contains('dark');document.getElementById('icon-sun').style.display=d?'none':'block';document.getElementById('icon-moon').style.display=d?'block':'none';});
+function updateThemeIcons() {
+    const isDark = document.documentElement.classList.contains('dark');
+    document.getElementById('theme-icon-sun').style.display = isDark ? 'inline-block' : 'none';
+    document.getElementById('theme-icon-moon').style.display = isDark ? 'none' : 'inline-block';
+}
+
+function toggleTheme() {
+    const isDark = document.documentElement.classList.toggle('dark');
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    updateThemeIcons();
+}
+
+// Initialize icons on load
+updateThemeIcons();
 </script>
 </body>
 </html>

@@ -29,15 +29,13 @@ class ProductController extends Controller
             ->orderBy('category')
             ->pluck('category');
 
-        $brands = Product::query()
-            ->join('employees', 'employees.id', '=', 'products.supplier_id')
-            ->where('products.is_active', true)
-            ->whereNull('products.deleted_at')
-            ->where('products.stock', '>', 0)
-            ->select('employees.id', 'employees.name')
+        $brands = Product::where('is_active', true)
+            ->whereNull('deleted_at')
+            ->whereNotNull('brand')
+            ->where('brand', '!=', '')
             ->distinct()
-            ->orderBy('employees.name')
-            ->pluck('employees.name', 'employees.id');
+            ->orderBy('brand')
+            ->pluck('brand', 'brand');
 
         $types = Product::where('is_active', true)
             ->whereNull('deleted_at')
@@ -91,15 +89,13 @@ class ProductController extends Controller
             ->distinct()
             ->orderBy('category')
             ->pluck('category');
-        $brands = Product::query()
-            ->join('employees', 'employees.id', '=', 'products.supplier_id')
-            ->where('products.is_active', true)
-            ->whereNull('products.deleted_at')
-            ->where('products.stock', '>', 0)
-            ->select('employees.id', 'employees.name')
+        $brands = Product::where('is_active', true)
+            ->whereNull('deleted_at')
+            ->whereNotNull('brand')
+            ->where('brand', '!=', '')
             ->distinct()
-            ->orderBy('employees.name')
-            ->pluck('employees.name', 'employees.id');
+            ->orderBy('brand')
+            ->pluck('brand', 'brand');
         $types = Product::where('is_active', true)
             ->whereNull('deleted_at')
             ->whereNotNull('type')
@@ -145,15 +141,7 @@ class ProductController extends Controller
         }
 
         if ($request->filled('brand')) {
-            $brandFilter = (string) $request->brand;
-            $query->where(function (Builder $filterQuery) use ($brandFilter) {
-                if (is_numeric($brandFilter)) {
-                    $filterQuery->where('supplier_id', (int) $brandFilter);
-                    return;
-                }
-
-                $filterQuery->whereHas('supplier', fn (Builder $supplierQuery) => $supplierQuery->where('name', $brandFilter));
-            });
+            $query->where('brand', $request->brand);
         }
 
         if ($request->filled('type')) {

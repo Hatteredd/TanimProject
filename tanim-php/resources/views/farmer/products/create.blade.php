@@ -26,7 +26,7 @@
                 <label class="label">Category *</label>
                 <select name="category" required class="input">
                     <option value="">Select category</option>
-                    @foreach(['Vegetables','Fruits','Grains & Rice','Root Crops','Herbs & Spices','Livestock','Seafood','Dairy','Other'] as $cat)
+                    @foreach(['Plants & Seeds','Vegetables','Fruits','Other'] as $cat)
                     <option value="{{ $cat }}" {{ old('category') === $cat ? 'selected' : '' }}>{{ $cat }}</option>
                     @endforeach
                 </select>

@@ -15,6 +15,13 @@
         @endphp
         <style>{!! $fallbackCss !!}</style>
     @endif
+    <script>
+        // Apply theme immediately to prevent flash
+        (function() {
+            const theme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            if (theme === 'dark') document.documentElement.classList.add('dark');
+        })();
+    </script>
 </head>
 <body class="transition-theme">
     <x-navbar />

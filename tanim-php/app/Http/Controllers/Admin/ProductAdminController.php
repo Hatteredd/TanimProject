@@ -51,7 +51,7 @@ class ProductAdminController extends Controller
 
     public function create()
     {
-        $categories = ['Vegetables', 'Fruits', 'Grains & Rice', 'Root Crops', 'Herbs & Spices', 'Livestock', 'Seafood', 'Dairy', 'Other'];
+        $categories = ['Plants & Seeds', 'Vegetables', 'Fruits', 'Other'];
         $suppliers = Employee::where('status', 'active')->orderBy('name')->get();
         return view('admin.products.create', compact('categories', 'suppliers'));
     }
@@ -110,7 +110,7 @@ class ProductAdminController extends Controller
     public function edit(Product $product)
     {
         $product->load('photos');
-        $categories = ['Vegetables', 'Fruits', 'Grains & Rice', 'Root Crops', 'Herbs & Spices', 'Livestock', 'Seafood', 'Dairy', 'Other'];
+        $categories = ['Plants & Seeds', 'Vegetables', 'Fruits', 'Other'];
         $suppliers = Employee::where('status', 'active')->orderBy('name')->get();
         return view('admin.products.edit', compact('product', 'categories', 'suppliers'));
     }
