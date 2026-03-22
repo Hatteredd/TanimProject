@@ -53,7 +53,6 @@
         <select name="customer_role" class="input" style="width:100%;">
             <option value="all" {{ $roleFilter === 'all' ? 'selected' : '' }}>All Roles</option>
             <option value="buyer" {{ $roleFilter === 'buyer' ? 'selected' : '' }}>Buyer</option>
-            <option value="farmer" {{ $roleFilter === 'farmer' ? 'selected' : '' }}>Farmer</option>
             <option value="admin" {{ $roleFilter === 'admin' ? 'selected' : '' }}>Admin</option>
         </select>
     </div>

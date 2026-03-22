@@ -87,6 +87,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/users/{user}/edit',            [UserController::class, 'edit'])->name('users.edit');
     Route::put('/users/{user}',                 [UserController::class, 'update'])->name('users.update');
     Route::delete('/users/{user}',              [UserController::class, 'destroy'])->name('users.destroy');
+    Route::get('/users/deleted',               [UserController::class, 'deleted'])->name('users.deleted');
+    Route::post('/users/{user}/restore',        [UserController::class, 'restore'])->name('users.restore');
+    Route::delete('/users/{user}/force',         [UserController::class, 'forceDelete'])->name('users.force-delete');
     Route::post('/users/{user}/toggle-active',  [UserController::class, 'toggleActive'])->name('users.toggle-active');
     Route::post('/users/{user}/role',           [UserController::class, 'updateRole'])->name('users.update-role');
     Route::get('/admins', function () {

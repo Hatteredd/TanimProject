@@ -119,20 +119,15 @@ CREATE TABLE IF NOT EXISTS `employees` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Expenses Table
-CREATE TABLE IF NOT EXISTS `expenses` (
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `type` varchar(255) NOT NULL,
-  `label` varchar(255) NOT NULL,
-  `amount` decimal(10,2) NOT NULL,
-  `expense_date` date NOT NULL,
-  `recurring` boolean NOT NULL DEFAULT false,
-  `recurring_period` varchar(255) NULL,
-  `notes` text NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+-- Additional Products with Brand and Type
+INSERT INTO `products` (`user_id`, `name`, `category`, `price`, `unit`, `stock`, `description`, `farm_location`, `harvest_date`, `brand`, `type`) VALUES
+(1, 'Red Bell Pepper', 'Vegetables', 85.00, 'kg', 60, 'Fresh red bell peppers perfect for stir-frying and roasting. Rich in vitamins A and C.', 'Benguet, Cordillera', '2026-03-15', 'Mountain Fresh Veggies', 'Sweet Pepper'),
+(1, 'Calamansi (Philippine Lime)', 'Fruits', 45.00, 'kg', 80, 'Small, green citrus fruits perfect for Filipino dishes and drinks. High in vitamin C.', 'Southern Leyte', '2026-03-16', 'Citrus Grove', 'Lime'),
+(1, 'Spinach', 'Vegetables', 55.00, 'bundle', 40, 'Tender spinach leaves rich in iron and vitamins. Perfect for salads and sautéing.', 'Tarlac, Luzon', '2026-03-17', 'Leafy Greens Co.', 'Leafy Green'),
+(1, 'Pineapple', 'Fruits', 95.00, 'piece', 30, 'Sweet and tangy pineapples from Mindanao. Perfect for desserts and juices.', 'Davao del Sur, Mindanao', '2026-03-14', 'Tropical Fruits PH', 'Tropical Fruit'),
+(1, 'Carrots', 'Vegetables', 50.00, 'kg', 100, 'Crunchy and sweet carrots perfect for soups, stews, and fresh eating.', 'Benguet, Cordillera', '2026-03-18', 'Root Harvest Farms', 'Root Vegetable'),
+(1, 'Guyabano (Melon)', 'Fruits', 75.00, 'piece', 25, 'Sweet and aromatic melon variety popular in the Philippines during summer.', 'Pampanga, Luzon', '2026-03-19', 'Summer Fruits Co.', 'Melon'),
+(1, 'Malunggay Leaves', 'Vegetables', 35.00, 'bundle', 60, 'Nutritious moringa leaves used in traditional Filipino soups like tinola.', 'Bulacan, Luzon', '2026-03-20', 'NutriGreens', 'Leafy Green');
 
 -- Jobs Table
 CREATE TABLE IF NOT EXISTS `jobs` (

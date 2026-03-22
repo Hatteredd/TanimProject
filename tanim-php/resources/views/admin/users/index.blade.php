@@ -15,7 +15,10 @@
         <button type="submit" class="btn-primary" style="padding:.6rem 1.1rem;font-size:.85rem;border-radius:.75rem;">Filter</button>
         @if(request()->hasAny(['search','role']))<a href="{{ route('admin.users.index') }}" style="padding:.6rem .9rem;background:var(--bg);color:var(--text-muted);font-size:.85rem;border:1px solid var(--border);border-radius:.75rem;text-decoration:none;">✕</a>@endif
     </form>
-    <a href="{{ route('admin.users.create') }}" class="btn-primary" style="padding:.6rem 1.25rem;font-size:.85rem;border-radius:.75rem;white-space:nowrap;">+ Add User</a>
+    <div style="display:flex;gap:.5rem;align-items:center;">
+        <a href="{{ route('admin.users.deleted') }}" class="btn-ghost" style="padding:.6rem 1.25rem;font-size:.85rem;border-radius:.75rem;white-space:nowrap;background:var(--bg);color:var(--text-muted);border:1px solid var(--border);">🗑️ Deleted Users</a>
+        <a href="{{ route('admin.users.create') }}" class="btn-primary" style="padding:.6rem 1.25rem;font-size:.85rem;border-radius:.75rem;white-space:nowrap;">+ Add User</a>
+    </div>
 </div>
 
 <div class="glass" style="border-radius:1.25rem;overflow:hidden;">

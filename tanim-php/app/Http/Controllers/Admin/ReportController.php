@@ -45,7 +45,7 @@ class ReportController extends Controller
             ? $request->input('status')
             : null;
 
-        $roleOptions = ['all', 'buyer', 'farmer', 'admin'];
+        $roleOptions = ['all', 'buyer', 'admin'];
         $roleFilter = in_array($request->input('customer_role', 'buyer'), $roleOptions, true)
             ? $request->input('customer_role', 'buyer')
             : 'buyer';

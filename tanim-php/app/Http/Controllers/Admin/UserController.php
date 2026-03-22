@@ -12,7 +12,7 @@ class UserController extends Controller
 {
     public function index(Request $request)
     {
-        $query = User::query();
+        $query = User::query()->whereNull('deleted_at'); // Exclude trashed users
 
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
@@ -79,9 +79,42 @@ class UserController extends Controller
     {
         if ($user->id === auth()->id()) return back()->withErrors(['error' => 'Cannot delete your own account.']);
         $name = $user->name;
-        $user->delete();
+        $user->delete(); // Soft delete
         ActivityLog::record('delete', "Admin deleted user: {$name}");
-        return back()->with('success', "User '{$name}' deleted.");
+        return back()->with('success', "User '{$name}' deleted and can be restored.");
+    }
+
+    public function deleted()
+    {
+        $deletedUsers = User::onlyTrashed()->latest()->paginate(20);
+        return view('admin.users.deleted', compact('deletedUsers'));
+    }
+
+    public function restore($userId)
+    {
+        $user = User::onlyTrashed()->findOrFail($userId);
+        
+        if (!$user->trashed()) {
+            return back()->withErrors(['error' => 'User is not deleted.']);
+        }
+        
+        $user->restore();
+        ActivityLog::record('restore', "Admin restored user: {$user->name}", $user);
+        return redirect()->route('admin.users.deleted')->with('success', "User '{$user->name}' has been restored.");
+    }
+
+    public function forceDelete($userId)
+    {
+        $user = User::onlyTrashed()->findOrFail($userId);
+        
+        if (!$user->trashed()) {
+            return back()->withErrors(['error' => 'User is not deleted.']);
+        }
+        
+        $name = $user->name;
+        $user->forceDelete(); // Permanent deletion
+        ActivityLog::record('delete', "Admin permanently deleted user: {$name}");
+        return redirect()->route('admin.users.deleted')->with('success', "User '{$name}' has been permanently deleted.");
     }
 
     public function toggleActive(User $user)
