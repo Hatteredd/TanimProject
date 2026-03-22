@@ -200,6 +200,19 @@ class MarketplaceSeeder extends Seeder
             ],
         ];
 
+        $sampleReviews = [
+            'The quality of this harvest is exceptional. You can really taste the freshness!',
+            'Arrived in perfect condition and well-packaged. Highly recommended for anyone looking for organic produce.',
+            'Best quality I have found online so far. Will definitely order again from this farm.',
+            'Very impressed with the vibrant colors and the natural aroma. 10/10!',
+            'Excellent value for money. The seeds had a very high germination rate in my garden.',
+            'Fast delivery and the produce was still crisp when it reached my doorstep.',
+            'Supporting local farmers while getting the best quality vegetables. A win-win!',
+            'Exactly as described. You can tell this was grown with a lot of care.',
+            'Fresh, clean, and delicious. My family loved the meal I prepared with these.',
+            'Beautiful plants! They arrived healthy and are already thriving in their new home.'
+        ];
+
         foreach ($products as $pData) {
             $supplier = $suppliers->random();
             $product = Product::create(array_merge($pData, [
@@ -216,7 +229,7 @@ class MarketplaceSeeder extends Seeder
                         'user_id' => $buyer->id,
                         'product_id' => $product->id,
                         'rating' => $faker->numberBetween(4, 5),
-                        'comment' => $faker->sentence(),
+                        'comment' => $faker->randomElement($sampleReviews),
                     ]);
                 }
             }
