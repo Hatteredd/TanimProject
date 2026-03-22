@@ -76,6 +76,8 @@ class OrderController extends Controller
                     throw new RuntimeException('Your cart is empty.');
                 }
 
+                $totalAmount = $cartItems->sum(fn($i) => $i->quantity * $i->product->price);
+
                 $order = Order::create([
                     'user_id'          => Auth::id(),
                     'order_number'     => Order::generateOrderNumber(),
@@ -83,6 +85,7 @@ class OrderController extends Controller
                     'shipping_address' => $validated['shipping_address'],
                     'contact_number'   => $validated['contact_number'],
                     'notes'            => $validated['notes'] ?? null,
+                    'total_amount'     => $totalAmount,
                 ]);
 
                 foreach ($cartItems as $item) {

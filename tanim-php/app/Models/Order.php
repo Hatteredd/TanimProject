@@ -11,6 +11,7 @@ class Order extends Model
     protected $fillable = [
         'user_id', 'order_number', 'status',
         'shipping_address', 'contact_number', 'notes', 'paid_at',
+        'total_amount',
     ];
 
     protected $casts = ['paid_at' => 'datetime'];
@@ -75,7 +76,9 @@ class Order extends Model
 
     public function getTotalAmountAttribute($value): float
     {
-        if ($value !== null) {
+        // If we have a stored value in the database and it's greater than 0, use it.
+        // Otherwise, calculate it dynamically from line items.
+        if ($value !== null && (float) $value > 0) {
             return (float) $value;
         }
 
