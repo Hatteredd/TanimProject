@@ -34,8 +34,6 @@
 
             <div style="display:flex;flex-wrap:wrap;gap:1rem;margin-bottom:2.5rem;">
                 <a href="{{ route('marketplace') }}" class="btn-primary" style="padding:1rem 2rem;font-size:1rem;border-radius:1.25rem;background:linear-gradient(135deg,#2e8b2e,#1f6b1f);box-shadow:0 8px 30px rgba(46,139,46,0.45);">🛒 Browse the Harvest</a>
-                <a href="{{ route('register') }}" style="display:inline-flex;align-items:center;gap:0.5rem;padding:1rem 2rem;background:rgba(212,168,67,0.15);backdrop-filter:blur(8px);border:1.5px solid rgba(212,168,67,0.35);color:#e8c060;font-weight:700;font-size:1rem;border-radius:1.25rem;text-decoration:none;transition:all .2s;"
-                   onmouseover="this.style.background='rgba(212,168,67,0.25)'" onmouseout="this.style.background='rgba(212,168,67,0.15)'">🌱 Join as a Farmer</a>
             </div>
 
 
@@ -170,7 +168,7 @@
             <span class="badge-earth" style="margin-bottom:1.25rem;display:inline-block;">🌱 About Tanim</span>
             <h2 style="font-family:Outfit,sans-serif;font-size:2.5rem;font-weight:800;color:var(--text);margin:0 0 1.25rem;line-height:1.2;">What is <span style="color:var(--primary);">Tanim</span>?</h2>
             <p style="font-size:1rem;color:var(--text-muted);line-height:1.8;margin:0 0 1rem;">
-                <strong style="color:var(--text);">Tanim</strong> (Filipino for <em>"to plant"</em>) is a web-based agricultural marketplace system designed to empower Filipino farmers by providing them a direct digital channel to sell produce — removing intermediaries that reduce farmer income and inflate consumer prices.
+                <strong style="color:var(--text);">Tanim</strong> (Filipino for <em>"to plant"</em>) is a web-based agricultural marketplace system designed to empower Filipino agriculture by providing a direct digital channel to sell produce — removing intermediaries that inflate consumer prices.
             </p>
             <p style="font-size:1rem;color:var(--text-muted);line-height:1.8;margin:0 0 2rem;">
                 The platform enables transparent transactions, order management, and a streamlined supply chain from farm gate to consumer.
@@ -178,7 +176,7 @@
             <a href="{{ route('register') }}" class="btn-primary" style="padding:0.85rem 1.75rem;font-size:0.9rem;border-radius:0.75rem;">Get Started →</a>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
-            @foreach([['🌾','Farmer Portal','List products, manage inventory and orders.'],['🛒','Buyer Marketplace','Browse and purchase fresh produce.'],['📦','Order Tracking','Real-time status for every order.'],['📊','Dashboard','Analytics for buyers and farmers.']] as [$ic,$t,$d])
+            @foreach([['🛒','Buyer Marketplace','Browse and purchase fresh produce.'],['📦','Order Tracking','Real-time status for every order.'],['📊','Dashboard','Analytics for buyers.'],['🌿','Fresh Harvest','Directly sourced high-quality produce.']] as [$ic,$t,$d])
             <div class="page-card" style="padding:1.25rem;transition:transform .2s,box-shadow .2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='var(--shadow-hover)'" onmouseout="this.style.transform='none';this.style.boxShadow='var(--shadow-card)'">
                 <span style="font-size:1.75rem;display:block;margin-bottom:0.6rem;">{{ $ic }}</span>
                 <h3 style="font-size:0.9rem;font-weight:700;color:var(--text);margin:0 0 0.3rem;">{{ $t }}</h3>
@@ -200,10 +198,10 @@
     </div>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;">
         @foreach([
-            ['🏪','Direct Sourcing','Buyers connect directly with local farmers, maximising freshness and traceability.'],
-            ['💰','Fair & Transparent Pricing','Farmers set their own prices. No hidden fees. See exactly where every peso goes.'],
+            ['🏪','Direct Sourcing','Buyers connect directly with high-quality produce, maximising freshness and traceability.'],
+            ['💰','Fair & Transparent Pricing','Clear pricing with no hidden fees. See exactly where every peso goes.'],
             ['🚚','Streamlined Logistics','Track orders from farm gate to delivery in real time.'],
-            ['🌾','Farmer Empowerment','List products, manage inventory, and see income analytics without tech expertise.'],
+            ['🛒','Buyer Experience','Easy browsing, secure checkout, and personalized dashboards.'],
             ['🔍','Smart Marketplace Search','Filter produce by category, price range, and availability.'],
         ] as [$ic,$t,$d])
         <div class="stat-card">
@@ -225,10 +223,9 @@
     </div>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.5rem;">
         @foreach([
-            ['🌱','Farmers','Sell Direct','Filipino farmers who want to sell harvest directly — without traders taking unfair margins.',['List & manage products','Set your own prices','Receive and fulfil orders','Track income'],'Join as Farmer','register'],
             ['🛍️','Buyers / Consumers','Buy Fresh','Households and businesses wanting authentic, fresh, affordable produce with full transparency.',['Browse fresh farm produce','Secure purchases','Order status tracking','Support local farmers'],'Start Shopping','marketplace'],
         ] as [$em,$role,$badge,$desc,$perks,$cta,$route])
-        <div class="page-card" style="padding:2rem;display:flex;flex-direction:column;">
+        <div class="page-card" style="padding:2rem;display:flex;flex-direction:column;max-width:400px;margin:0 auto;">
             <div style="font-size:2.8rem;margin-bottom:1rem;">{{ $em }}</div>
             <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.75rem;">
                 <h3 style="font-size:1.1rem;font-weight:800;color:var(--text);margin:0;">{{ $role }}</h3>

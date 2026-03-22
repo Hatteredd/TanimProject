@@ -67,7 +67,6 @@ class AuthController extends Controller
         $validated = $request->validate([
             'name'     => ['required', 'string', 'max:255'],
             'email'    => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'role'     => ['required', 'in:buyer'],
             'password' => ['required', 'min:8', 'confirmed'],
             'photo'    => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ]);
@@ -80,7 +79,7 @@ class AuthController extends Controller
         $user = User::create([
             'name'     => $validated['name'],
             'email'    => $validated['email'],
-            'role'     => $validated['role'],
+            'role'     => 'buyer',
             'password' => Hash::make($validated['password']),
             'photo'    => $photoPath,
             'is_active'=> true,
