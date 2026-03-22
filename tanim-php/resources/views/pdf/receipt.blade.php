@@ -168,7 +168,11 @@
         <table class="totals">
             <tr>
                 <td class="t-right" style="width:78%;">Subtotal</td>
-                <td class="t-right" style="width:22%;">{{ number_format($order->total_amount, 2) }}</td>
+                <td class="t-right" style="width:22%;">{{ number_format($order->total_amount - 100, 2) }}</td>
+            </tr>
+            <tr>
+                <td class="t-right">Shipping Fee</td>
+                <td class="t-right">100.00</td>
             </tr>
             <tr>
                 <td class="t-right">Tax</td>

@@ -51,6 +51,14 @@
                 <span style="font-size:0.875rem;font-weight:700;color:var(--primary);">₱{{ number_format($item->quantity * $item->product->price, 2) }}</span>
             </div>
             @endforeach
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:0.6rem 0;border-bottom:1px solid var(--border);">
+                <span style="font-size:0.875rem;color:var(--text-muted);">Subtotal</span>
+                <span style="font-size:0.875rem;font-weight:700;color:var(--text);">₱{{ number_format($subtotal, 2) }}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:0.6rem 0;border-bottom:1px solid var(--border);">
+                <span style="font-size:0.875rem;color:var(--text-muted);">Shipping Fee</span>
+                <span style="font-size:0.875rem;font-weight:700;color:var(--text);">₱{{ number_format($shipping_fee, 2) }}</span>
+            </div>
             <div style="display:flex;justify-content:space-between;align-items:center;padding-top:1rem;margin-top:0.5rem;">
                 <span style="font-size:1rem;font-weight:800;color:var(--text);">Total</span>
                 <span style="font-size:1.25rem;font-weight:900;color:var(--primary);">₱{{ number_format($total, 2) }}</span>

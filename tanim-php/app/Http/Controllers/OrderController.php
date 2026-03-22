@@ -47,9 +47,11 @@ class OrderController extends Controller
             return redirect()->route('cart.index')->with('error', 'Your cart is empty.');
         }
 
-        $total = $cartItems->sum(fn($i) => $i->quantity * $i->product->price);
+        $subtotal = $cartItems->sum(fn($i) => $i->quantity * $i->product->price);
+        $shipping_fee = 100;
+        $total = $subtotal + $shipping_fee;
 
-        return view('orders.checkout', compact('cartItems', 'total'));
+        return view('orders.checkout', compact('cartItems', 'subtotal', 'shipping_fee', 'total'));
     }
 
     public function store(Request $request)
@@ -76,7 +78,9 @@ class OrderController extends Controller
                     throw new RuntimeException('Your cart is empty.');
                 }
 
-                $totalAmount = $cartItems->sum(fn($i) => $i->quantity * $i->product->price);
+                $subtotal = $cartItems->sum(fn($i) => $i->quantity * $i->product->price);
+                $shipping_fee = 100;
+                $totalAmount = $subtotal + $shipping_fee;
 
                 $order = Order::create([
                     'user_id'          => Auth::id(),
