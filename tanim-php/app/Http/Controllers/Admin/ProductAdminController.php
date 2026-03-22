@@ -29,6 +29,8 @@ class ProductAdminController extends Controller
             });
         }
         if ($request->filled('category')) $query->where('category', $request->category);
+        if ($request->filled('brand')) $query->where('brand', $request->brand);
+        if ($request->filled('type')) $query->where('type', $request->type);
         if ($request->filled('status')) {
             if ($request->status === 'trashed') $query->onlyTrashed();
             elseif ($request->status === 'inactive') $query->where('is_active', false)->whereNull('deleted_at');
@@ -37,8 +39,14 @@ class ProductAdminController extends Controller
 
         $products   = $query->latest()->get();
         $categories = Product::distinct()->pluck('category');
+        $brands     = Product::distinct()->whereNotNull('brand')->where('brand', '!=', '')->pluck('brand')->map(function($brand) {
+            return trim(ucwords(strtolower($brand)));
+        })->unique()->sort()->values();
+        $types      = Product::distinct()->whereNotNull('type')->where('type', '!=', '')->pluck('type')->map(function($type) {
+            return trim(ucwords(strtolower($type)));
+        })->unique()->sort()->values();
 
-        return view('admin.products.index', compact('products', 'categories'));
+        return view('admin.products.index', compact('products', 'categories', 'brands', 'types'));
     }
 
     public function create()

@@ -12,6 +12,18 @@
             <option value="{{ $cat }}" {{ request('category')===$cat?'selected':'' }}>{{ $cat }}</option>
             @endforeach
         </select>
+        <select name="brand" class="input" style="width:auto;min-width:140px;">
+            <option value="">All Brands</option>
+            @foreach($brands as $brand)
+            <option value="{{ $brand }}" {{ request('brand')===$brand?'selected':'' }}>{{ $brand }}</option>
+            @endforeach
+        </select>
+        <select name="type" class="input" style="width:auto;min-width:140px;">
+            <option value="">All Types</option>
+            @foreach($types as $type)
+            <option value="{{ $type }}" {{ request('type')===$type?'selected':'' }}>{{ $type }}</option>
+            @endforeach
+        </select>
         <select name="status" class="input" style="width:auto;min-width:120px;">
             <option value="">All Status</option>
             <option value="active" {{ request('status')==='active'?'selected':'' }}>Active</option>
@@ -19,7 +31,7 @@
             <option value="trashed" {{ request('status')==='trashed'?'selected':'' }}>Deleted</option>
         </select>
         <button type="submit" class="btn-primary" style="padding:.6rem 1.1rem;font-size:.85rem;border-radius:.75rem;">Filter</button>
-        @if(request()->hasAny(['search','category','status']))<a href="{{ route('admin.products.index') }}" style="padding:.6rem .9rem;background:var(--bg);color:var(--text-muted);font-size:.85rem;border:1px solid var(--border);border-radius:.75rem;text-decoration:none;">✕</a>@endif
+        @if(request()->hasAny(['search','category','brand','type','status']))<a href="{{ route('admin.products.index') }}" style="padding:.6rem .9rem;background:var(--bg);color:var(--text-muted);font-size:.85rem;border:1px solid var(--border);border-radius:.75rem;text-decoration:none;">✕</a>@endif
     </form>
     <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;">
         <form method="POST" action="{{ route('admin.products.import') }}" enctype="multipart/form-data" style="display:flex;gap:.45rem;align-items:center;">
@@ -40,6 +52,9 @@
         <thead>
             <tr style="background:var(--bg);border-bottom:1px solid var(--border);">
                 <th class="th-cell" data-sort="name" style="text-align:left;cursor:pointer;">Product</th>
+                <th class="th-cell" style="text-align:left;">Category</th>
+                <th class="th-cell" style="text-align:left;">Brand</th>
+                <th class="th-cell" style="text-align:left;">Type</th>
                 <th class="th-cell" data-sort="price" style="text-align:right;cursor:pointer;">Price</th>
                 <th class="th-cell" data-sort="stock" style="text-align:center;cursor:pointer;">Stock</th>
                 <th class="th-cell" data-sort="status" style="text-align:center;cursor:pointer;">Status</th>
@@ -63,9 +78,18 @@
                         @endif
                         <div>
                         <p style="font-size:.85rem;font-weight:700;color:var(--text);margin:0;">{{ $product->name }}</p>
-                        <p style="font-size:.72rem;color:var(--text-muted);margin:0;">{{ $product->category }} @if($product->photos->count()) · {{ $product->photos->count() }} photo{{ $product->photos->count() > 1 ? 's' : '' }} @endif</p>
+                        <p style="font-size:.72rem;color:var(--text-muted);margin:0;">@if($product->photos->count()){{ $product->photos->count() }} photo{{ $product->photos->count() > 1 ? 's' : '' }} @endif</p>
                         </div>
                     </div>
+                </td>
+                <td class="td-cell">
+                    <span class="badge" style="background:var(--bg);color:var(--text-muted);padding:.25rem .5rem;border-radius:.375rem;font-size:.72rem;font-weight:700;">{{ $product->category }}</span>
+                </td>
+                <td class="td-cell">
+                    <span class="badge" style="background:var(--primary-faint);color:var(--primary);padding:.25rem .5rem;border-radius:.375rem;font-size:.72rem;font-weight:700;">{{ $product->brand ?? 'N/A' }}</span>
+                </td>
+                <td class="td-cell">
+                    <span class="badge" style="background:var(--earth-faint);color:var(--earth);padding:.25rem .5rem;border-radius:.375rem;font-size:.72rem;font-weight:700;">{{ $product->type ?? 'N/A' }}</span>
                 </td>
                 <td class="td-cell" style="text-align:right;font-size:.85rem;font-weight:700;color:var(--primary);">₱{{ number_format($product->price,2) }}</td>
                 <td class="td-cell" style="text-align:center;">
