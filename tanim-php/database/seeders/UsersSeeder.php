@@ -10,7 +10,7 @@ class UsersSeeder extends Seeder
 {
     public function run(): void
     {
-        $admin = User::firstOrCreate(
+        $admin = User::updateOrCreate(
             ['email' => 'admin@tanim.ph'],
             [
                 'name' => 'Admin Tanim',
@@ -23,8 +23,27 @@ class UsersSeeder extends Seeder
 
         $admin->forceFill([
             'role' => 'admin',
+            'password' => Hash::make('admin123'),
             'is_active' => true,
             'email_verified_at' => $admin->email_verified_at ?: now(),
+        ])->save();
+
+        $customer = User::updateOrCreate(
+            ['email' => 'customer@tanim.ph'],
+            [
+                'name' => 'Customer Tanim',
+                'role' => 'buyer',
+                'password' => Hash::make('customer123'),
+                'is_active' => true,
+                'email_verified_at' => now(),
+            ]
+        );
+
+        $customer->forceFill([
+            'role' => 'buyer',
+            'password' => Hash::make('customer123'),
+            'is_active' => true,
+            'email_verified_at' => $customer->email_verified_at ?: now(),
         ])->save();
 
         $buyers = [

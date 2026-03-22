@@ -13,7 +13,12 @@ class AuthController extends Controller
 {
     public function showLogin()
     {
-        if (Auth::check()) return redirect()->route('home');
+        if (Auth::check()) {
+            return Auth::user()->role === 'admin'
+                ? redirect()->route('admin.dashboard')
+                : redirect()->route('home');
+        }
+
         return view('auth.login');
     }
 
@@ -48,7 +53,12 @@ class AuthController extends Controller
 
     public function showRegister()
     {
-        if (Auth::check()) return redirect()->route('home');
+        if (Auth::check()) {
+            return Auth::user()->role === 'admin'
+                ? redirect()->route('admin.dashboard')
+                : redirect()->route('home');
+        }
+
         return view('auth.register');
     }
 

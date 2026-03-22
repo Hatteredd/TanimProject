@@ -527,13 +527,11 @@
                 <div style="margin-bottom:1rem;">
                     <textarea name="comment" rows="3" style="width:100%;padding:0.75rem 1rem;border:1.5px solid var(--border);border-radius:0.75rem;font-size:0.875rem;background:var(--bg);color:var(--text);outline:none;resize:vertical;box-sizing:border-box;">{{ $userReview->comment }}</textarea>
                 </div>
-                <div style="display:flex;gap:0.75rem;">
-                    <button type="submit" class="btn-primary" style="padding:0.65rem 1.5rem;">Update Review</button>
-                    <form method="POST" action="{{ route('reviews.destroy', $userReview) }}" style="display:inline;" onsubmit="return confirm('Delete your review?')">
-                        @csrf @method('DELETE')
-                        <button type="submit" class="btn-ghost" style="padding:0.65rem 1.5rem;color:#dc2626;">Delete</button>
-                    </form>
-                </div>
+                <button type="submit" class="btn-primary" style="padding:0.65rem 1.5rem;">Update Review</button>
+            </form>
+            <form method="POST" action="{{ route('reviews.destroy', $userReview) }}" onsubmit="return confirm('Delete your review?')" style="margin-top:0.75rem;display:inline-block;">
+                @csrf @method('DELETE')
+                <button type="submit" class="btn-ghost" style="padding:0.65rem 1.5rem;color:#dc2626;">Delete</button>
             </form>
         </div>
         @else

@@ -40,11 +40,12 @@
             </div>
             <form method="POST" action="{{ route('cart.update', $item) }}" style="display:flex;align-items:center;gap:0.5rem;">
                 @csrf @method('PATCH')
-                <button type="button" onclick="this.form.quantity.value=Math.max(1,parseInt(this.form.quantity.value)-1);this.form.submit();"
+                <button type="button" onclick="const current=parseInt(this.form.quantity.value||'1',10)||1; this.form.quantity.value=Math.max(1,current-1); this.form.submit();"
                     style="width:2rem;height:2rem;border:1.5px solid var(--border);border-radius:0.5rem;background:var(--bg);font-size:1rem;cursor:pointer;color:var(--text);">&#8722;</button>
                 <input type="number" name="quantity" value="{{ $item->quantity }}" min="1" max="{{ $item->product->stock }}"
+                    onchange="this.value=Math.max(1, parseInt(this.value||'1',10)||1); this.form.submit();"
                     style="width:3.5rem;text-align:center;border:1.5px solid var(--border);border-radius:0.5rem;padding:0.3rem;font-size:0.9rem;font-weight:600;color:var(--text);background:var(--bg);" />
-                <button type="button" onclick="this.form.quantity.value=Math.min({{ $item->product->stock }},parseInt(this.form.quantity.value)+1);this.form.submit();"
+                <button type="button" onclick="const current=parseInt(this.form.quantity.value||'1',10)||1; this.form.quantity.value=Math.min({{ $item->product->stock }},current+1); this.form.submit();"
                     style="width:2rem;height:2rem;border:1.5px solid var(--border);border-radius:0.5rem;background:var(--bg);font-size:1rem;cursor:pointer;color:var(--text);">+</button>
             </form>
             <div style="min-width:80px;text-align:right;">

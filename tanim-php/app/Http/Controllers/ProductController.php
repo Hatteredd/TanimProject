@@ -12,6 +12,10 @@ class ProductController extends Controller
 {
     public function home(Request $request)
     {
+        if (Auth::check() && Auth::user()->role === 'admin') {
+            return redirect()->route('admin.dashboard');
+        }
+
         $featured = Product::where('is_active', true)
             ->where('stock', '>', 0)
             ->latest()

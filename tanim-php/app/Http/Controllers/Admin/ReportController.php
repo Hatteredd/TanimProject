@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use App\Models\Order;
 use App\Models\OrderItem;
-use App\Models\Product;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
@@ -16,14 +15,18 @@ class ReportController extends Controller
     {
         $year = now()->year;
         $driver = DB::connection()->getDriverName();
-        $monthExpr = $driver === 'sqlite'
-            ? "CAST(strftime('%m', created_at) AS INTEGER)"
-            : 'MONTH(created_at)';
+        $orderMonthExpr = $driver === 'sqlite'
+            ? "CAST(strftime('%m', orders.created_at) AS INTEGER)"
+            : 'MONTH(orders.created_at)';
+        $userMonthExpr = $driver === 'sqlite'
+            ? "CAST(strftime('%m', users.created_at) AS INTEGER)"
+            : 'MONTH(users.created_at)';
 
         // Monthly sales (all 12 months)
-        $monthlySales = Order::whereYear('created_at', $year)
-            ->whereNotIn('status', ['cancelled'])
-            ->selectRaw("{$monthExpr} as month, SUM(total_amount) as total, COUNT(*) as count")
+        $monthlySales = Order::leftJoin('order_items', 'orders.id', '=', 'order_items.order_id')
+            ->whereYear('orders.created_at', $year)
+            ->whereNotIn('orders.status', ['cancelled'])
+            ->selectRaw("{$orderMonthExpr} as month, COALESCE(SUM(order_items.unit_price * order_items.quantity), 0) as total, COUNT(DISTINCT orders.id) as count")
             ->groupBy('month')->orderBy('month')->get()->keyBy('month');
 
         $monthlyData = [];
@@ -36,13 +39,13 @@ class ReportController extends Controller
         }
 
         // Top products by revenue
-        $topProducts = OrderItem::selectRaw('product_name, SUM(subtotal) as total, SUM(quantity) as qty')
+        $topProducts = OrderItem::selectRaw('product_name, SUM(unit_price * quantity) as total, SUM(quantity) as qty')
             ->groupBy('product_name')->orderByDesc('total')->limit(10)->get();
 
         // Customer registrations by month (buyers only)
         $userRegs = User::where('role', 'buyer')
             ->whereYear('created_at', $year)
-            ->selectRaw("{$monthExpr} as month, COUNT(*) as count")
+            ->selectRaw("{$userMonthExpr} as month, COUNT(*) as count")
             ->groupBy('month')->orderBy('month')->get()->keyBy('month');
 
         $userRegData = [];
@@ -54,10 +57,21 @@ class ReportController extends Controller
         }
 
         // Summary KPIs
-        $totalRevenue  = Order::whereNotIn('status', ['cancelled'])->sum('total_amount');
+        $totalRevenue = (float) (OrderItem::join('orders', 'order_items.order_id', '=', 'orders.id')
+            ->whereNotIn('orders.status', ['cancelled'])
+            ->selectRaw('COALESCE(SUM(order_items.unit_price * order_items.quantity), 0) as total')
+            ->value('total') ?? 0);
         $totalOrders   = Order::count();
         $totalCustomers = User::where('role', 'buyer')->count();
-        $avgOrderValue = Order::whereNotIn('status', ['cancelled'])->avg('total_amount') ?? 0;
+        $avgOrderValue = (float) (DB::query()
+            ->fromSub(
+                Order::leftJoin('order_items', 'orders.id', '=', 'order_items.order_id')
+                    ->whereNotIn('orders.status', ['cancelled'])
+                    ->groupBy('orders.id')
+                    ->selectRaw('COALESCE(SUM(order_items.unit_price * order_items.quantity), 0) as order_total'),
+                'order_totals'
+            )
+            ->avg('order_total') ?? 0);
 
         // Orders by status
         $ordersByStatus = Order::selectRaw('status, COUNT(*) as count')
@@ -65,7 +79,7 @@ class ReportController extends Controller
 
         // Category sales
         $categorySales = OrderItem::join('products', 'order_items.product_id', '=', 'products.id')
-            ->selectRaw('products.category, SUM(order_items.subtotal) as total')
+            ->selectRaw('products.category, SUM(order_items.unit_price * order_items.quantity) as total')
             ->groupBy('products.category')->orderByDesc('total')->get();
 
         // Monthly order count for sparkline

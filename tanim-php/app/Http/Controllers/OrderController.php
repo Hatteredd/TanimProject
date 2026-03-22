@@ -20,7 +20,7 @@ class OrderController extends Controller
     {
         abort_if(Auth::user()->role === 'admin', 403, 'Admins cannot access customer orders this way.');
 
-        $orders = Order::with('items')
+        $orders = Order::with('items')->withComputedTotal()
             ->where('user_id', Auth::id())
             ->latest()
             ->paginate(10);
@@ -58,9 +58,13 @@ class OrderController extends Controller
 
         $validated = $request->validate([
             'shipping_address' => ['required', 'string', 'max:500'],
-            'contact_number'   => ['required', 'string', 'max:20'],
+            'contact_number'   => ['required', 'string', 'regex:/^(?:\+63|0)9\d{9}$/'],
             'notes'            => ['nullable', 'string', 'max:500'],
+        ], [
+            'contact_number.regex' => 'Please enter a valid Philippine mobile number (e.g., 09171234567 or +639171234567).',
         ]);
+
+        $validated['contact_number'] = preg_replace('/\s+|-/', '', $validated['contact_number']);
 
         try {
             $order = DB::transaction(function () use ($validated) {
@@ -72,13 +76,10 @@ class OrderController extends Controller
                     throw new RuntimeException('Your cart is empty.');
                 }
 
-                $total = 0;
-
                 $order = Order::create([
                     'user_id'          => Auth::id(),
                     'order_number'     => Order::generateOrderNumber(),
                     'status'           => 'pending',
-                    'total_amount'     => 0,
                     'shipping_address' => $validated['shipping_address'],
                     'contact_number'   => $validated['contact_number'],
                     'notes'            => $validated['notes'] ?? null,
@@ -92,22 +93,16 @@ class OrderController extends Controller
                         throw new RuntimeException("Insufficient stock for {$productName}.");
                     }
 
-                    $subtotal = $item->quantity * $product->price;
-                    $total += $subtotal;
-
                     OrderItem::create([
                         'order_id'     => $order->id,
                         'product_id'   => $product->id,
                         'product_name' => $product->name,
                         'unit_price'   => $product->price,
                         'quantity'     => $item->quantity,
-                        'subtotal'     => $subtotal,
                     ]);
 
                     $product->decrement('stock', $item->quantity);
                 }
-
-                $order->update(['total_amount' => $total]);
 
                 CartItem::where('user_id', Auth::id())->delete();
 

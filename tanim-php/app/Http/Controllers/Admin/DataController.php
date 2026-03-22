@@ -30,7 +30,7 @@ class DataController extends Controller
         $data = match($table) {
             'users'    => User::all(['id','name','email','role','is_active','created_at']),
             'products' => Product::withTrashed()->get(),
-            'orders'   => Order::with('user:id,name,email')->latest()->get()->map(function ($order) {
+            'orders'   => Order::with('user:id,name,email')->withComputedTotal()->latest()->get()->map(function ($order) {
                 return [
                     'id' => $order->id,
                     'order_number' => $order->order_number,
@@ -76,7 +76,7 @@ class DataController extends Controller
         $rows = match($table) {
             'users'    => User::latest()->paginate(25),
             'products' => Product::withTrashed()->latest()->paginate(25),
-            'orders'   => Order::with('user:id,name,email')->latest()->paginate(25)->through(function ($order) {
+            'orders'   => Order::with('user:id,name,email')->withComputedTotal()->latest()->paginate(25)->through(function ($order) {
                 return [
                     'id' => $order->id,
                     'order_number' => $order->order_number,
