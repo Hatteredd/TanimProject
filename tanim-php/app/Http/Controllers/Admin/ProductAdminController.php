@@ -70,7 +70,7 @@ class ProductAdminController extends Controller
             'harvest_date'  => 'nullable|date',
             'is_active'     => 'boolean',
             'image'         => 'nullable|image|mimes:jpg,jpeg,png,webp|max:3072',
-            'photos'        => 'nullable|array|max:3',
+            'photos'        => 'nullable|array|max:6',
             'photos.*'      => 'image|mimes:jpg,jpeg,png,webp|max:4096',
         ]);
 
@@ -129,7 +129,7 @@ class ProductAdminController extends Controller
             'harvest_date'  => 'nullable|date',
             'is_active'     => 'boolean',
             'image'         => 'nullable|image|mimes:jpg,jpeg,png,webp|max:3072',
-            'photos'        => 'nullable|array|max:3',
+            'photos'        => 'nullable|array|max:6',
             'photos.*'      => 'image|mimes:jpg,jpeg,png,webp|max:4096',
         ]);
 
@@ -148,9 +148,9 @@ class ProductAdminController extends Controller
         if ($request->hasFile('photos')) {
             $existingCount = $product->photos()->count();
             $incomingCount = count($request->file('photos'));
-            if (($existingCount + $incomingCount) > 3) {
+            if (($existingCount + $incomingCount) > 6) {
                 return back()
-                    ->withErrors(['photos' => 'You can only keep up to 3 gallery photos per product.'])
+                    ->withErrors(['photos' => 'You can only keep up to 6 gallery photos per product.'])
                     ->withInput();
             }
 

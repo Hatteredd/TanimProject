@@ -79,9 +79,18 @@ class Product extends Model
     public function primaryPhoto(): ?string
     {
         $primary = $this->photos()->where('is_primary', true)->first();
-        if ($primary) return asset('storage/' . $primary->path);
+        if ($primary) return $primary->url();
+        
         $first = $this->photos()->first();
-        if ($first) return asset('storage/' . $first->path);
-        return $this->image ? asset('storage/' . $this->image) : null;
+        if ($first) return $first->url();
+        
+        if ($this->image) {
+            if (str_starts_with($this->image, 'http')) {
+                return $this->image;
+            }
+            return asset('storage/' . $this->image);
+        }
+        
+        return null;
     }
 }

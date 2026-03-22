@@ -68,20 +68,22 @@
                     <textarea name="description" class="input" rows="3" placeholder="Product description...">{{ old('description') }}</textarea>
                 </div>
             </div>
-            <div>
-                <label class="label">Product Image</label>
-                <input name="image" type="file" class="input" accept="image/*" style="padding:.5rem;" />
-            </div>
-            <div>
-                <label class="label">Gallery Photos <span style="font-weight:400;color:var(--text-light);">(optional, up to 3)</span></label>
-                <div id="drop-zone-create" style="border:2px dashed var(--border);border-radius:.75rem;padding:1.5rem;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg-soft);">
-                    <div style="font-size:2rem;margin-bottom:.5rem;">📁</div>
-                    <p style="margin:0;font-weight:600;color:var(--text);">Drag photos here or click to select</p>
-                    <p style="margin:.25rem 0 0;font-size:.75rem;color:var(--text-light);">You can select multiple photos at once (up to 3)</p>
+            <div style="grid-column:1/-1;">
+                <label class="label">Product Photos <span style="font-weight:400;color:var(--text-light);">(Select up to 6 photos at once)</span></label>
+                <div id="drop-zone-create" style="border:2px dashed var(--border);border-radius:1rem;padding:2rem;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg-2);position:relative;overflow:hidden;">
+                    <div id="drop-zone-content">
+                        <div style="font-size:3rem;margin-bottom:1rem;">📸</div>
+                        <p style="margin:0;font-size:1.1rem;font-weight:800;color:var(--text);">Drop photos here or click to browse</p>
+                        <p style="margin:0.5rem 0 0;font-size:0.85rem;color:var(--text-muted);">The first photo will be the main cover image.</p>
+                    </div>
+                    <input id="photos-input-create" name="photos[]" type="file" class="input" accept="image/*" multiple style="position:absolute;inset:0;opacity:0;cursor:pointer;" />
                 </div>
-                <input id="photos-input-create" type="file" class="input" accept="image/*" multiple style="display:none;" />
-                <div id="preview-create" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:.75rem;margin-top:1rem;"></div>
-                <p style="margin:.5rem 0 0;font-size:.72rem;color:var(--text-light);">Select up to 3 photos. The first photo will be used as primary when no product image is set.</p>
+                
+                <div id="preview-create" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:1rem;margin-top:1.5rem;"></div>
+                
+                @error('photos')
+                    <p style="color:var(--danger);font-size:0.85rem;margin-top:0.5rem;font-weight:700;">{{ $message }}</p>
+                @enderror
             </div>
             <div style="display:flex;align-items:center;gap:.6rem;">
                 <input type="checkbox" name="is_active" value="1" id="is_active" {{ old('is_active','1')?'checked':'' }} style="width:1rem;height:1rem;accent-color:var(--primary);" />
@@ -98,11 +100,9 @@
 const dropZone = document.getElementById('drop-zone-create');
 const fileInput = document.getElementById('photos-input-create');
 const preview = document.getElementById('preview-create');
-const form = document.getElementById('product-form');
 const supplierSelect = document.getElementById('supplier_id');
 const supplierLocationPreview = document.getElementById('supplier_location_preview');
-const maxFiles = 3;
-let selectedFiles = [];
+const maxFiles = 6;
 
 function syncSupplierPreview() {
     const selected = supplierSelect.options[supplierSelect.selectedIndex];
@@ -113,16 +113,18 @@ supplierSelect.addEventListener('change', syncSupplierPreview);
 syncSupplierPreview();
 
 function updatePreview(files) {
-    selectedFiles = Array.from(files).slice(0, maxFiles);
     preview.innerHTML = '';
-    selectedFiles.forEach((file, index) => {
+    Array.from(files).slice(0, maxFiles).forEach((file, index) => {
         const reader = new FileReader();
         reader.onload = (e) => {
             const div = document.createElement('div');
-            div.style.cssText = 'position:relative;border-radius:.5rem;overflow:hidden;border:1px solid var(--border);';
+            div.className = 'animate-fade-in';
+            div.style.cssText = 'position:relative;border-radius:1rem;overflow:hidden;border:1px solid var(--border);box-shadow:var(--shadow-neu-sm);aspect-ratio:1;';
             div.innerHTML = `
-                <img src="${e.target.result}" style="width:100%;height:100px;object-fit:cover;display:block;" />
-                <div style="position:absolute;top:0;right:0;background:var(--primary);color:white;font-size:.65rem;padding:.25rem .5rem;border-radius:0 0 0 .4rem;font-weight:700;">+${index + 1}</div>
+                <img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;display:block;" />
+                <div style="position:absolute;top:0.5rem;right:0.5rem;background:var(--primary);color:white;font-size:0.65rem;padding:0.2rem 0.6rem;border-radius:9999px;font-weight:900;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
+                    ${index === 0 ? 'Cover' : 'Gallery'}
+                </div>
             `;
             preview.appendChild(div);
         };
@@ -130,82 +132,31 @@ function updatePreview(files) {
     });
 }
 
-dropZone.addEventListener('click', () => fileInput.click());
-
-dropZone.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    dropZone.style.borderColor = 'var(--primary)';
-    dropZone.style.backgroundColor = 'var(--primary)';
-    dropZone.style.opacity = '0.1';
-});
-
-dropZone.addEventListener('dragleave', () => {
-    dropZone.style.borderColor = 'var(--border)';
-    dropZone.style.backgroundColor = 'var(--bg-soft)';
-    dropZone.style.opacity = '1';
-});
-
-dropZone.addEventListener('drop', (e) => {
-    e.preventDefault();
-    dropZone.style.borderColor = 'var(--border)';
-    dropZone.style.backgroundColor = 'var(--bg-soft)';
-    dropZone.style.opacity = '1';
-    
-    if (e.dataTransfer.files.length > maxFiles) {
-        alert(`You can only add up to ${maxFiles} gallery photos. You dropped ${e.dataTransfer.files.length} files.\n\nPlease try with up to ${maxFiles} photos.`);
-        return;
-    }
-    updatePreview(e.dataTransfer.files);
-});
-
 fileInput.addEventListener('change', (e) => {
     if (e.target.files.length > maxFiles) {
-        alert(`You can only add up to ${maxFiles} gallery photos. You selected ${e.target.files.length} files.\n\nPlease select up to ${maxFiles} photos and try again.`);
+        alert(`You can only select up to ${maxFiles} photos at once.`);
         e.target.value = '';
-        selectedFiles = [];
         preview.innerHTML = '';
         return;
     }
     updatePreview(e.target.files);
 });
 
-form.addEventListener('submit', (e) => {
-    if (selectedFiles.length > 0) {
-        e.preventDefault();
-        
-        const formData = new FormData(form);
-        
-        // Remove old photos[] fields if any
-        formData.delete('photos[]');
-        
-        // Add selected files
-        selectedFiles.forEach(file => {
-            formData.append('photos[]', file);
-        });
-        
-        // Submit via fetch
-        fetch(form.action, {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
-            }
-        })
-        .then(response => {
-            if (response.ok) {
-                window.location.href = '{{ route("admin.products.index") }}';
-            } else {
-                return response.text().then(html => {
-                    alert('Error creating product. Check console for details.');
-                    console.log(html);
-                });
-            }
-        })
-        .catch(err => {
-            console.error('Submit error:', err);
-            alert('Error creating product');
-        });
-    }
+// Drag & Drop feedback
+dropZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropZone.style.borderColor = 'var(--primary)';
+    dropZone.style.background = 'var(--primary-faint)';
+});
+
+dropZone.addEventListener('dragleave', () => {
+    dropZone.style.borderColor = 'var(--border)';
+    dropZone.style.background = 'var(--bg-2)';
+});
+
+dropZone.addEventListener('drop', () => {
+    dropZone.style.borderColor = 'var(--border)';
+    dropZone.style.background = 'var(--bg-2)';
 });
 </script>
 @endsection

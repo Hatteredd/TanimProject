@@ -57,12 +57,56 @@
     transform: scale(1.03);
 }
 
+/* Gallery Navigation */
+.pd-nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3rem;
+    height: 3rem;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(4px);
+    border: 1px solid var(--border);
+    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: all var(--transition-fast);
+    opacity: 0;
+    visibility: hidden;
+}
+.pd-image-box:hover .pd-nav-btn {
+    opacity: 1;
+    visibility: visible;
+}
+.pd-nav-btn:hover {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+.pd-nav-prev { left: 1rem; }
+.pd-nav-next { right: 1rem; }
+
 .pd-thumb-grid {
     display: flex;
     gap: 0.75rem;
     margin-top: 1rem;
     overflow-x: auto;
     padding-bottom: 0.5rem;
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary-faint) transparent;
+}
+.pd-thumb-grid::-webkit-scrollbar {
+    height: 4px;
+}
+.pd-thumb-grid::-webkit-scrollbar-track {
+    background: transparent;
+}
+.pd-thumb-grid::-webkit-scrollbar-thumb {
+    background-color: var(--primary-faint);
+    border-radius: 20px;
 }
 
 .pd-thumb {
@@ -307,6 +351,15 @@
                 
                 @if($mainPhoto || $product->primaryPhoto())
                     <img src="{{ $mainUrl }}" alt="{{ $product->name }}" class="pd-main-img" id="mainImg" style="transition: opacity 0.3s ease-in-out;" />
+                    
+                    @if($galleryPhotos->count() > 1)
+                        <button class="pd-nav-btn pd-nav-prev" onclick="moveGallery(-1)" aria-label="Previous Image">
+                            <svg style="width:1.5rem;height:1.5rem;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                        </button>
+                        <button class="pd-nav-btn pd-nav-next" onclick="moveGallery(1)" aria-label="Next Image">
+                            <svg style="width:1.5rem;height:1.5rem;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                        </button>
+                    @endif
                 @else
                     <div style="font-size:8rem;">🌿</div>
                 @endif
@@ -317,8 +370,8 @@
                 @foreach($galleryPhotos as $photo)
                 <img src="{{ $photo->url() }}" 
                      alt="{{ $product->name }} view {{ $loop->iteration }}"
-                     class="pd-thumb {{ ($mainPhoto && $mainPhoto->id === $photo->id) ? 'active' : '' }}" 
-                     onclick="switchImg(this, '{{ $photo->url() }}')" />
+                     class="pd-thumb gallery-thumb {{ ($mainPhoto && $mainPhoto->id === $photo->id) ? 'active' : '' }}" 
+                     onclick="switchImg(this, '{{ $photo->url() }}', {{ $loop->index }})" />
                 @endforeach
             </div>
             @endif
@@ -683,16 +736,43 @@ document.querySelectorAll('.star-label').forEach(star => {
     });
 });
 
-document.querySelectorAll('.pd-thumb').forEach((thumb) => {
-    thumb.addEventListener('click', function () {
-        const target = document.getElementById('main-product-image');
-        if (!target) return;
+let currentImgIndex = 0;
+const galleryThumbs = document.querySelectorAll('.gallery-thumb');
 
-        target.src = this.dataset.photoSrc;
-        document.querySelectorAll('.pd-thumb').forEach((el) => el.classList.remove('active'));
-        this.classList.add('active');
-    });
-});
+function switchImg(thumb, url, index) {
+    if (index !== undefined) currentImgIndex = index;
+    
+    document.querySelectorAll('.pd-thumb').forEach(t => t.classList.remove('active'));
+    if (thumb) {
+        thumb.classList.add('active');
+    } else if (galleryThumbs[currentImgIndex]) {
+        galleryThumbs[currentImgIndex].classList.add('active');
+    }
+    
+    const mainImg = document.getElementById('mainImg');
+    if (mainImg) {
+        mainImg.style.opacity = '0';
+        setTimeout(() => {
+            mainImg.src = url;
+            mainImg.style.opacity = '1';
+        }, 150);
+    }
+}
+
+function moveGallery(delta) {
+    if (!galleryThumbs.length) return;
+    
+    currentImgIndex += delta;
+    if (currentImgIndex < 0) currentImgIndex = galleryThumbs.length - 1;
+    if (currentImgIndex >= galleryThumbs.length) currentImgIndex = 0;
+    
+    const targetThumb = galleryThumbs[currentImgIndex];
+    const targetUrl = targetThumb.src;
+    switchImg(targetThumb, targetUrl, currentImgIndex);
+    
+    // Scroll thumb into view if needed
+    targetThumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+}
 </script>
 
 <script>
