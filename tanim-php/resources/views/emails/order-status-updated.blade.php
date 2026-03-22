@@ -37,6 +37,12 @@
             <p style="font-size:12px;font-weight:700;color:#9ca3af;text-transform:uppercase;margin:0 0 6px;">Order Total</p>
             <p style="font-size:18px;font-weight:900;color:#15803d;margin:0;">₱{{ number_format($order->total_amount, 2) }}</p>
         </div>
+
+        <div style="text-align:center;margin-top:18px;">
+            <a href="{{ route('orders.receipt', $order) }}" style="display:inline-block;background:#111827;color:#ffffff;text-decoration:none;font-size:13px;font-weight:700;padding:10px 18px;border-radius:8px;">
+                Download / Print Receipt
+            </a>
+        </div>
     </div>
 
     <div style="background:#f9fafb;padding:20px;text-align:center;border-top:1px solid #e5e7eb;">

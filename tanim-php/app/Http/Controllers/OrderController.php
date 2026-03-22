@@ -141,15 +141,17 @@ class OrderController extends Controller
         abort_if($order->user_id !== Auth::id() && Auth::user()->role !== 'admin', 403);
         $order->load('items.product', 'user');
 
-        $pdf = Pdf::loadView('pdf.receipt', compact('order'));
+        $pdf = Pdf::loadView('pdf.receipt', compact('order'))
+            ->setPaper($this->receiptPaperSize($order), 'portrait');
         return $pdf->download('receipt-' . $order->order_number . '.pdf');
     }
 
     private function generateReceiptPdf(Order $order): ?string
     {
         try {
-            $order->load('items', 'user');
-            $pdf = Pdf::loadView('pdf.receipt', compact('order'));
+            $order->load('items.product', 'user');
+            $pdf = Pdf::loadView('pdf.receipt', compact('order'))
+                ->setPaper($this->receiptPaperSize($order), 'portrait');
             $path = storage_path('app/receipts/receipt-' . $order->order_number . '.pdf');
 
             if (!is_dir(storage_path('app/receipts'))) {
@@ -162,5 +164,19 @@ class OrderController extends Controller
             logger()->error('PDF generation failed: ' . $e->getMessage());
             return null;
         }
+    }
+
+    private function receiptPaperSize(Order $order): array
+    {
+        // Slightly wider receipt paper to avoid clipping in PDF renderers.
+        $widthMm = 105;
+        $baseHeightMm = 130;
+        $perItemMm = 8;
+        $notesMm = filled($order->notes) ? 12 : 0;
+        $heightMm = max(140, $baseHeightMm + ($order->items->count() * $perItemMm) + $notesMm);
+
+        $mmToPt = 2.83464567;
+
+        return [0, 0, $widthMm * $mmToPt, $heightMm * $mmToPt];
     }
 }
