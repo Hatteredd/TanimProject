@@ -174,12 +174,10 @@
                     </div>
                 </div>
                 @auth
-                @if(Auth::user()->role !== 'admin')
                 <form method="POST" action="{{ route('cart.add', $product) }}" style="margin-top:0.75rem;">
                     @csrf<input type="hidden" name="quantity" value="1"/>
                     <button type="submit" class="btn-primary" style="width:100%;padding:0.55rem;font-size:0.8rem;border-radius:0.55rem;">&#128722; Add to Cart</button>
                 </form>
-                @endif
                 @else
                 <a href="{{ route('login') }}" class="btn-ghost" style="display:block;margin-top:0.75rem;text-align:center;padding:0.55rem;font-size:0.8rem;border-radius:0.55rem;">Login to Buy</a>
                 @endauth
@@ -233,7 +231,6 @@
             ['🚚','Streamlined Logistics','Track orders from farm gate to delivery in real time.'],
             ['🌾','Farmer Empowerment','List products, manage inventory, and see income analytics without tech expertise.'],
             ['🔍','Smart Marketplace Search','Filter produce by category, price range, and availability.'],
-            ['📋','Admin Control Panel','Admins monitor users, products, and platform-wide performance data.'],
         ] as [$ic,$t,$d])
         <div class="stat-card">
             <div style="background:var(--primary-faint);width:3.2rem;height:3.2rem;border-radius:0.75rem;display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin-bottom:1rem;box-shadow:var(--shadow-neu-sm);">{{ $ic }}</div>
@@ -256,7 +253,6 @@
         @foreach([
             ['🌱','Farmers','Sell Direct','Filipino farmers who want to sell harvest directly — without traders taking unfair margins.',['List & manage products','Set your own prices','Receive and fulfil orders','Track income'],'Join as Farmer','register'],
             ['🛍️','Buyers / Consumers','Buy Fresh','Households and businesses wanting authentic, fresh, affordable produce with full transparency.',['Browse fresh farm produce','Secure purchases','Order status tracking','Support local farmers'],'Start Shopping','marketplace'],
-            ['⚙️','Administrators','Manage All','Platform administrators who maintain quality listings and a safe marketplace environment.',['Monitor users & activity','Manage product categories','Review transactions','Platform reports'],'Admin Login','login'],
         ] as [$em,$role,$badge,$desc,$perks,$cta,$route])
         <div class="page-card" style="padding:2rem;display:flex;flex-direction:column;">
             <div style="font-size:2.8rem;margin-bottom:1rem;">{{ $em }}</div>

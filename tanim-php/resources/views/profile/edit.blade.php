@@ -83,6 +83,7 @@
 
             <form method="POST" action="{{ route('profile.update') }}" enctype="multipart/form-data" style="display:flex;flex-direction:column;gap:1rem;">
                 @csrf
+                <input type="hidden" name="delete_photo" id="delete_photo" value="0">
 
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
                     <div>
@@ -99,6 +100,15 @@
                 <div>
                     <label class="label">Profile Photo</label>
                     <input type="file" name="photo" accept="image/*" class="profile-file" style="cursor:pointer;" />
+                    @if($user->photo)
+                    <div style="display:flex;align-items:center;gap:0.75rem;margin-top:0.75rem;">
+                        <img src="{{ $user->photoUrl() }}" alt="Current profile picture" style="width:3rem;height:3rem;border-radius:9999px;object-fit:cover;border:2px solid var(--primary-faint);" />
+                        <div>
+                            <p style="font-size:0.8rem;color:var(--text-muted);margin:0 0 0.5rem;">Current photo</p>
+                            <button type="button" onclick="deleteProfilePhoto()" class="btn-ghost" style="padding:0.4rem 0.8rem;font-size:0.75rem;border-radius:0.6rem;color:#dc2626;border-color:#dc2626;">Delete Photo</button>
+                        </div>
+                    </div>
+                    @endif
                     <p style="font-size:0.75rem;color:var(--text-light);margin-top:0.35rem;">Leave blank to keep current photo. Max 2MB.</p>
                 </div>
 
@@ -126,4 +136,17 @@
         </section>
     </div>
 </div>
+
+<script>
+function deleteProfilePhoto() {
+    if (confirm('Are you sure you want to delete your profile photo? This action cannot be undone.')) {
+        document.getElementById('delete_photo').value = '1';
+        // Hide the current photo section
+        const photoSection = event.target.closest('div').parentElement;
+        photoSection.style.display = 'none';
+        // Clear the file input
+        document.querySelector('input[name="photo"]').value = '';
+    }
+}
+</script>
 @endsection

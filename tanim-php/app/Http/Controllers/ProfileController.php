@@ -25,6 +25,15 @@ class ProfileController extends Controller
             'password' => ['nullable', 'min:8', 'confirmed'],
         ]);
 
+        // Handle photo deletion
+        if ($request->input('delete_photo') == '1') {
+            if ($user->photo) {
+                Storage::disk('public')->delete($user->photo);
+                $validated['photo'] = null;
+            }
+        }
+
+        // Handle new photo upload
         if ($request->hasFile('photo')) {
             if ($user->photo) Storage::disk('public')->delete($user->photo);
             $validated['photo'] = $request->file('photo')->store('photos/users', 'public');

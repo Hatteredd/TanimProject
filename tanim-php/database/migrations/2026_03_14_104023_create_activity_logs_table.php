@@ -16,7 +16,7 @@ return new class extends Migration {
             $table->string('description');
             $table->string('ip_address', 45)->nullable();
             $table->string('user_agent')->nullable();
-            $table->json('properties')->nullable();
+            $table->text('properties')->nullable();
             $table->timestamps();
         });
     }

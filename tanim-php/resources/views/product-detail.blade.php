@@ -523,10 +523,7 @@
                 </div>
                 <div style="display:flex;gap:0.75rem;">
                     <button type="submit" class="btn-primary" style="padding:0.65rem 1.5rem;">Update Review</button>
-                    <form method="POST" action="{{ route('reviews.destroy', $userReview) }}" style="display:inline;" onsubmit="return confirm('Delete your review?')">
-                        @csrf @method('DELETE')
-                        <button type="submit" class="btn-ghost" style="padding:0.65rem 1.5rem;color:#dc2626;">Delete</button>
-                    </form>
+                    <button type="button" onclick="if(confirm('Delete your review?')) { window.location.href='{{ route('reviews.destroy', $userReview) }}'; }" class="btn-ghost" style="padding:0.65rem 1.5rem;color:#dc2626;">Delete</button>
                 </div>
             </form>
         </div>
@@ -539,7 +536,21 @@
 
         {{-- Individual reviews --}}
         @forelse($reviews as $review)
-        <div class="review-card">
+        <div class="review-card" id="review-{{ $review->id }}">
+            @if(Auth::check() && (Auth::id() === $review->user_id || Auth::user()->role === 'admin'))
+            <div style="display:flex;justify-content:flex-end;margin-bottom:0.5rem;">
+                @if(Auth::id() === $review->user_id)
+                <button onclick="showEditReview({{ $review->id }}, {{ $review->rating }}, '{{ $review->comment ?? '' }}')" style="padding:0.3rem 0.6rem;font-size:0.7rem;border-radius:0.5rem;background:var(--primary-faint);color:var(--primary);border:1px solid var(--primary-soft);cursor:pointer;margin-right:0.3rem;">Edit</button>
+                @endif
+                <form method="POST" action="{{ route('reviews.destroy', $review) }}" style="margin:0;" onsubmit="return confirm('Delete this review?');">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" style="padding:0.3rem 0.6rem;font-size:0.7rem;border-radius:0.5rem;background:#fef2f2;color:#dc2626;border:1px solid #fecaca;cursor:pointer;">
+                        Delete @if(Auth::user()->role === 'admin') (Admin) @endif
+                    </button>
+                </form>
+            </div>
+            @endif
             <div class="review-user-row">
                 <div style="display:flex;align-items:center;gap:0.6rem;">
                     <div style="width:2rem;height:2rem;border-radius:9999px;background:var(--primary-faint);display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:800;color:var(--primary);">
@@ -564,6 +575,37 @@
         </div>
         @endforelse
     </section>
+
+    {{-- Edit Review Modal --}}
+    <div id="editReviewModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;">
+        <div style="background:var(--bg);border-radius:1rem;padding:1.5rem;max-width:400px;width:90%;max-height:80vh;overflow-y:auto;">
+            <h3 style="margin:0 0 1rem;font-size:1.1rem;color:var(--text);">Edit Your Review</h3>
+            <form id="editReviewForm" method="POST">
+                @csrf
+                @method('PATCH')
+                <input type="hidden" id="editReviewId" name="review_id">
+                
+                <div style="margin-bottom:1rem;">
+                    <label style="display:block;margin-bottom:0.5rem;font-size:0.9rem;color:var(--text);">Rating</label>
+                    <div id="editRating" style="display:flex;gap:0.5rem;font-size:1.5rem;">
+                        @for($i=1;$i<=5;$i++)
+                        <button type="button" class="star-btn" data-rating="{{ $i }}" style="background:none;border:none;cursor:pointer;color:var(--border);transition:color 0.2s;">★</button>
+                        @endfor
+                    </div>
+                </div>
+                
+                <div style="margin-bottom:1.5rem;">
+                    <label style="display:block;margin-bottom:0.5rem;font-size:0.9rem;color:var(--text);">Comment</label>
+                    <textarea id="editComment" name="comment" rows="3" style="width:100%;padding:0.75rem;border:1px solid var(--border);border-radius:0.5rem;background:var(--bg);color:var(--text);resize:vertical;" placeholder="Share your experience..."></textarea>
+                </div>
+                
+                <div style="display:flex;gap:0.75rem;justify-content:flex-end;">
+                    <button type="button" onclick="hideEditReview()" style="padding:0.6rem 1.2rem;border:1px solid var(--border);background:var(--bg);color:var(--text);border-radius:0.5rem;cursor:pointer;">Cancel</button>
+                    <button type="submit" style="padding:0.6rem 1.2rem;background:var(--primary);color:var(--primary-fg);border:1px solid var(--primary);border-radius:0.5rem;cursor:pointer;">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
 
     {{-- ── MORE FROM TANIM ── --}}
@@ -649,6 +691,102 @@ document.querySelectorAll('.pd-thumb').forEach((thumb) => {
         target.src = this.dataset.photoSrc;
         document.querySelectorAll('.pd-thumb').forEach((el) => el.classList.remove('active'));
         this.classList.add('active');
+    });
+});
+</script>
+
+<script>
+// Review editing functionality
+let currentRating = 5;
+
+function showEditReview(reviewId, rating, comment) {
+    currentRating = rating;
+    document.getElementById('editReviewId').value = reviewId;
+    document.getElementById('editComment').value = comment;
+    
+    // Set rating stars
+    updateEditStars(rating);
+    
+    // Show modal
+    document.getElementById('editReviewModal').style.display = 'flex';
+}
+
+function hideEditReview() {
+    document.getElementById('editReviewModal').style.display = 'none';
+}
+
+function updateEditStars(rating) {
+    document.querySelectorAll('.star-btn').forEach((star, index) => {
+        star.style.color = (index < rating) ? '#f59e0b' : 'var(--border)';
+    });
+    currentRating = rating;
+}
+
+// Star rating interaction
+document.querySelectorAll('.star-btn').forEach(star => {
+    star.addEventListener('click', function() {
+        const rating = parseInt(this.dataset.rating);
+        updateEditStars(rating);
+    });
+    
+    star.addEventListener('mouseenter', function() {
+        const rating = parseInt(this.dataset.rating);
+        document.querySelectorAll('.star-btn').forEach((s, index) => {
+            s.style.color = (index < rating) ? '#f59e0b' : 'var(--border)';
+        });
+    });
+});
+
+document.getElementById('editRating').addEventListener('mouseleave', function() {
+    updateEditStars(currentRating);
+});
+
+// Handle form submission
+document.getElementById('editReviewForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    console.log('Form submission started');
+    
+    const reviewId = document.getElementById('editReviewId').value;
+    const comment = document.getElementById('editComment').value;
+    
+    console.log('Review ID:', reviewId);
+    console.log('Rating:', currentRating);
+    console.log('Comment:', comment);
+    
+    const formData = new FormData(this);
+    formData.append('rating', currentRating);
+    
+    console.log('Form data:', Object.fromEntries(formData));
+    
+    fetch(`/reviews/${reviewId}`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
+        }
+    })
+    .then(response => {
+        console.log('Response status:', response.status);
+        return response.text();
+    })
+    .then(text => {
+        console.log('Response text:', text);
+        try {
+            const data = JSON.parse(text);
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error updating review: ' + (data.message || 'Please try again.'));
+            }
+        } catch (e) {
+            console.log('Response text:', text);
+            alert('Server response error. Check console for details.');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error updating review. Please try again.');
     });
 });
 </script>

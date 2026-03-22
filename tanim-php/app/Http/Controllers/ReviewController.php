@@ -46,6 +46,10 @@ class ReviewController extends Controller
 
         $review->update($validated);
 
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'Review updated successfully.']);
+        }
+
         return back()->with('success', 'Review updated.');
     }
 
