@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Imports\ProductsImport;
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
+use App\Models\Employee;
 use App\Models\Product;
 use App\Models\ProductPhoto;
 use Illuminate\Http\Request;
@@ -43,7 +44,8 @@ class ProductAdminController extends Controller
     public function create()
     {
         $categories = ['Vegetables', 'Fruits', 'Grains & Rice', 'Root Crops', 'Herbs & Spices', 'Livestock', 'Seafood', 'Dairy', 'Other'];
-        return view('admin.products.create', compact('categories'));
+        $suppliers = Employee::where('status', 'active')->orderBy('name')->get();
+        return view('admin.products.create', compact('categories', 'suppliers'));
     }
 
     public function store(Request $request)
@@ -51,19 +53,22 @@ class ProductAdminController extends Controller
         $data = $request->validate([
             'name'          => 'required|string|max:200',
             'category'      => 'required|string|max:120',
-            'brand'         => 'nullable|string|max:120',
+            'supplier_id'   => 'required|exists:employees,id',
             'type'          => 'nullable|string|max:120',
             'description'   => 'nullable|string',
             'price'         => 'required|numeric|min:0',
             'unit'          => 'required|string|max:50',
             'stock'         => 'required|integer|min:0',
-            'farm_location' => 'nullable|string|max:200',
             'harvest_date'  => 'nullable|date',
             'is_active'     => 'boolean',
             'image'         => 'nullable|image|mimes:jpg,jpeg,png,webp|max:3072',
             'photos'        => 'nullable|array|max:3',
             'photos.*'      => 'image|mimes:jpg,jpeg,png,webp|max:4096',
         ]);
+
+        $supplier = Employee::findOrFail((int) $data['supplier_id']);
+        $data['brand'] = $data['name'];
+        $data['farm_location'] = $supplier->location;
 
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('products', 'public');
@@ -98,7 +103,8 @@ class ProductAdminController extends Controller
     {
         $product->load('photos');
         $categories = ['Vegetables', 'Fruits', 'Grains & Rice', 'Root Crops', 'Herbs & Spices', 'Livestock', 'Seafood', 'Dairy', 'Other'];
-        return view('admin.products.edit', compact('product', 'categories'));
+        $suppliers = Employee::where('status', 'active')->orderBy('name')->get();
+        return view('admin.products.edit', compact('product', 'categories', 'suppliers'));
     }
 
     public function update(Request $request, Product $product)
@@ -106,19 +112,22 @@ class ProductAdminController extends Controller
         $data = $request->validate([
             'name'          => 'required|string|max:200',
             'category'      => 'required|string|max:120',
-            'brand'         => 'nullable|string|max:120',
+            'supplier_id'   => 'required|exists:employees,id',
             'type'          => 'nullable|string|max:120',
             'description'   => 'nullable|string',
             'price'         => 'required|numeric|min:0',
             'unit'          => 'required|string|max:50',
             'stock'         => 'required|integer|min:0',
-            'farm_location' => 'nullable|string|max:200',
             'harvest_date'  => 'nullable|date',
             'is_active'     => 'boolean',
             'image'         => 'nullable|image|mimes:jpg,jpeg,png,webp|max:3072',
             'photos'        => 'nullable|array|max:3',
             'photos.*'      => 'image|mimes:jpg,jpeg,png,webp|max:4096',
         ]);
+
+        $supplier = Employee::findOrFail((int) $data['supplier_id']);
+        $data['brand'] = $data['name'];
+        $data['farm_location'] = $supplier->location;
 
         if ($request->hasFile('image')) {
             if ($product->image) Storage::disk('public')->delete($product->image);

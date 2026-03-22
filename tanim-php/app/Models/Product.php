@@ -13,7 +13,7 @@ class Product extends Model
     use Searchable, SoftDeletes;
 
     protected $fillable = [
-        'user_id', 'name', 'category', 'brand', 'type', 'description',
+        'user_id', 'supplier_id', 'name', 'category', 'brand', 'type', 'description',
         'price', 'unit', 'stock', 'image', 'is_active',
         'farm_location', 'harvest_date',
     ];
@@ -27,6 +27,11 @@ class Product extends Model
     public function farmer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function supplier(): BelongsTo
+    {
+        return $this->belongsTo(Employee::class, 'supplier_id');
     }
 
     public function cartItems(): HasMany

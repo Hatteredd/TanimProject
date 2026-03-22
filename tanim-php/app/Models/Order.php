@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Order extends Model
 {
     protected $fillable = [
-        'user_id', 'order_number', 'status', 'total_amount',
+        'user_id', 'order_number', 'status',
         'shipping_address', 'contact_number', 'notes', 'paid_at',
     ];
 
@@ -62,6 +62,30 @@ class Order extends Model
     public function statusColor(): string
     {
         return self::statusColors()[$this->status] ?? '#6b7280';
+    }
+
+    public function scopeWithComputedTotal($query)
+    {
+        return $query->addSelect([
+            'total_amount' => OrderItem::query()
+                ->selectRaw('COALESCE(SUM(unit_price * quantity), 0)')
+                ->whereColumn('order_id', 'orders.id'),
+        ]);
+    }
+
+    public function getTotalAmountAttribute($value): float
+    {
+        if ($value !== null) {
+            return (float) $value;
+        }
+
+        if ($this->relationLoaded('items')) {
+            return (float) $this->items->sum(fn (OrderItem $item) => ((float) $item->unit_price) * ((int) $item->quantity));
+        }
+
+        return (float) ($this->items()
+            ->selectRaw('COALESCE(SUM(unit_price * quantity), 0) as total')
+            ->value('total') ?? 0);
     }
 
     public static function generateOrderNumber(): string

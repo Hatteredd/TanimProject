@@ -11,7 +11,6 @@ return new class extends Migration {
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('order_number')->unique();
             $table->enum('status', ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'])->default('pending');
-            $table->decimal('total_amount', 12, 2);
             $table->string('shipping_address');
             $table->string('contact_number', 20)->nullable();
             $table->text('notes')->nullable();
@@ -26,7 +25,6 @@ return new class extends Migration {
             $table->string('product_name'); // snapshot
             $table->decimal('unit_price', 10, 2);
             $table->integer('quantity');
-            $table->decimal('subtotal', 12, 2);
             $table->timestamps();
         });
     }

@@ -358,6 +358,12 @@
 
             {{-- Farm meta --}}
             <div class="pd-meta">
+                @if($product->supplier)
+                <div class="pd-meta-row">
+                    <span>🚚</span>
+                    <span>Supplier: <strong>{{ $product->supplier->name }}</strong></span>
+                </div>
+                @endif
                 @if($product->farm_location)
                 <div class="pd-meta-row">
                     <span>📍</span>
@@ -521,7 +527,7 @@
                 <div style="margin-bottom:1rem;">
                     <textarea name="comment" rows="3" style="width:100%;padding:0.75rem 1rem;border:1.5px solid var(--border);border-radius:0.75rem;font-size:0.875rem;background:var(--bg);color:var(--text);outline:none;resize:vertical;box-sizing:border-box;">{{ $userReview->comment }}</textarea>
                 </div>
-                <div style="display:flex;gap:0.75rem;">
+<div style="display:flex;gap:0.75rem;">
                     <button type="submit" class="btn-primary" style="padding:0.65rem 1.5rem;">Update Review</button>
                     <button type="button" onclick="if(confirm('Delete your review?')) { window.location.href='{{ route('reviews.destroy', $userReview) }}'; }" class="btn-ghost" style="padding:0.65rem 1.5rem;color:#dc2626;">Delete</button>
                 </div>

@@ -58,12 +58,23 @@ class CartController extends Controller
     public function update(Request $request, CartItem $cartItem)
     {
         $this->authorize('update', $cartItem);
-        $qty = (int) $request->input('quantity', 1);
+        $product = $cartItem->product()->first();
+        $stock = max(0, (int) ($product?->stock ?? 0));
+        $qty = max(1, (int) $request->input('quantity', 1));
+
+        if ($stock > 0) {
+            $qty = min($qty, $stock);
+        }
+
         if ($qty < 1) {
             $cartItem->delete();
+        } elseif ($stock < 1) {
+            $cartItem->delete();
+            return back()->with('cart_success', 'Item removed because it is out of stock.');
         } else {
             $cartItem->update(['quantity' => $qty]);
         }
+
         return back();
     }
 

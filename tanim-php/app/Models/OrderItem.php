@@ -8,13 +8,21 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class OrderItem extends Model
 {
     protected $fillable = [
-        'order_id', 'product_id', 'product_name', 'unit_price', 'quantity', 'subtotal',
+        'order_id', 'product_id', 'product_name', 'unit_price', 'quantity',
     ];
 
     protected $casts = [
         'unit_price' => 'decimal:2',
-        'subtotal'   => 'decimal:2',
     ];
+
+    public function getSubtotalAttribute($value): float
+    {
+        if ($value !== null) {
+            return (float) $value;
+        }
+
+        return ((float) $this->unit_price) * ((int) $this->quantity);
+    }
 
     public function order(): BelongsTo
     {

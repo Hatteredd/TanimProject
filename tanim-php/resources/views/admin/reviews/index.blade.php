@@ -6,11 +6,24 @@
 <form method="GET" style="display:flex;gap:0.75rem;margin-bottom:1.5rem;flex-wrap:wrap;">
     <input type="text" name="search" value="{{ request('search') }}" placeholder="Search by user or product..."
         class="input" style="flex:1;min-width:200px;" />
+    <select name="product_id" class="input" style="width:auto;min-width:180px;">
+        <option value="">All Products</option>
+        @foreach($products as $product)
+            <option value="{{ $product->id }}" {{ (string) request('product_id') === (string) $product->id ? 'selected' : '' }}>{{ $product->name }}</option>
+        @endforeach
+    </select>
+    <select name="supplier_id" class="input" style="width:auto;min-width:180px;">
+        <option value="">All Suppliers</option>
+        @foreach($suppliers as $supplier)
+            <option value="{{ $supplier->id }}" {{ (string) request('supplier_id') === (string) $supplier->id ? 'selected' : '' }}>{{ $supplier->name }}</option>
+        @endforeach
+    </select>
     <select name="rating" class="input" style="width:auto;min-width:130px;">
         <option value="">All Ratings</option>
         @for($i=5;$i>=1;$i--)<option value="{{ $i }}" {{ request('rating') == $i ? 'selected' : '' }}>{{ $i }} &#9733;</option>@endfor
     </select>
     <button type="submit" class="btn-primary" style="padding:0.65rem 1.25rem;font-size:0.875rem;border-radius:0.75rem;">Filter</button>
+    <a href="{{ route('admin.reviews.index') }}" class="btn-ghost" style="padding:0.65rem 1.25rem;font-size:0.875rem;border-radius:0.75rem;text-decoration:none;">Reset</a>
 </form>
 
 @if(session('success'))

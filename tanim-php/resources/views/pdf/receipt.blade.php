@@ -4,94 +4,188 @@
     <meta charset="utf-8">
     <title>Receipt — {{ $order->order_number }}</title>
     <style>
+        @page { margin: 2.5mm; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: DejaVu Sans, sans-serif; font-size: 12px; color: #111827; padding: 40px; }
-        .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #16a34a; padding-bottom: 20px; }
-        .logo { font-size: 28px; font-weight: 900; color: #16a34a; }
-        .subtitle { font-size: 11px; color: #6b7280; margin-top: 4px; }
-        .receipt-title { font-size: 18px; font-weight: 700; color: #111827; margin-top: 12px; }
-        .meta { display: flex; justify-content: space-between; margin-bottom: 24px; }
-        .meta-block { }
-        .meta-label { font-size: 10px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; }
-        .meta-value { font-size: 13px; font-weight: 600; color: #111827; margin-top: 3px; }
-        .status-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; background: #dcfce7; color: #15803d; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        th { background: #f9fafb; padding: 8px 10px; text-align: left; font-size: 10px; font-weight: 700; color: #6b7280; text-transform: uppercase; border-bottom: 1px solid #e5e7eb; }
-        td { padding: 10px; border-bottom: 1px solid #f3f4f6; font-size: 12px; }
-        .total-row td { font-weight: 700; font-size: 14px; border-top: 2px solid #e5e7eb; border-bottom: none; }
-        .total-amount { color: #15803d; font-size: 16px; font-weight: 900; }
-        .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; text-align: center; font-size: 10px; color: #9ca3af; }
-        .delivery { background: #f9fafb; border-radius: 8px; padding: 14px; margin-bottom: 20px; }
-        .delivery h3 { font-size: 11px; font-weight: 700; color: #374151; margin-bottom: 8px; text-transform: uppercase; }
+        body {
+            font-family: "Courier New", "DejaVu Sans Mono", monospace;
+            font-size: 10px;
+            line-height: 1.35;
+            color: #000;
+            background: #fff;
+        }
+        .receipt {
+            width: 100%;
+            margin: 0;
+            border: 1px solid #000;
+            padding: 6px;
+            overflow: hidden;
+        }
+        .center { text-align: center; }
+        .shop-name { font-size: 16px; font-weight: 700; letter-spacing: 0.08em; }
+        .title { font-size: 12px; font-weight: 700; margin-top: 4px; }
+        .muted { font-size: 10px; }
+        .rule {
+            border-top: 1px dashed #000;
+            margin: 10px 0;
+        }
+        .meta,
+        .totals {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .meta td,
+        .totals td {
+            padding: 2px 0;
+            vertical-align: top;
+        }
+        .label {
+            width: 86px;
+            font-weight: 700;
+        }
+        .item-table {
+            width: 96%;
+            border-collapse: collapse;
+            margin-top: 6px;
+            margin-left: auto;
+            margin-right: auto;
+            table-layout: fixed;
+        }
+        .item-table th,
+        .item-table td {
+            border-bottom: 1px dashed #000;
+            padding: 4px 2px;
+            font-size: 10px;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+        }
+        .item-table th {
+            border-top: 1px solid #000;
+            border-bottom: 1px solid #000;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            font-size: 10px;
+        }
+        .t-right { text-align: right; }
+        .t-center { text-align: center; }
+        .totals {
+            margin-top: 8px;
+            width: 96%;
+            margin-left: auto;
+            margin-right: auto;
+            table-layout: fixed;
+        }
+        .item-table th:last-child,
+        .item-table td:last-child,
+        .totals td:last-child {
+            padding-right: 8px;
+        }
+        .totals .grand td {
+            border-top: 1px solid #000;
+            font-weight: 700;
+            padding-top: 5px;
+        }
+        .footer {
+            margin-top: 10px;
+            text-align: center;
+            font-size: 10px;
+        }
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="logo">🌿 Tanim</div>
-        <div class="subtitle">Philippine Agricultural Marketplace · tanim.ph</div>
-        <div class="receipt-title">Official Receipt</div>
-    </div>
+    <div class="receipt">
+        <div class="center">
+            <div class="shop-name">TANIM</div>
+            <div class="muted">Philippine Agricultural Marketplace</div>
+            <div class="title">OFFICIAL RECEIPT</div>
+        </div>
 
-    <table style="margin-bottom:20px;border:none;">
-        <tr>
-            <td style="border:none;padding:4px 0;width:50%;">
-                <div class="meta-label">Order Number</div>
-                <div class="meta-value">{{ $order->order_number }}</div>
-            </td>
-            <td style="border:none;padding:4px 0;text-align:right;">
-                <div class="meta-label">Date</div>
-                <div class="meta-value">{{ $order->created_at->format('F d, Y') }}</div>
-            </td>
-        </tr>
-        <tr>
-            <td style="border:none;padding:4px 0;">
-                <div class="meta-label">Customer</div>
-                <div class="meta-value">{{ $order->user->name }}</div>
-                <div style="font-size:11px;color:#6b7280;">{{ $order->user->email }}</div>
-            </td>
-            <td style="border:none;padding:4px 0;text-align:right;">
-                <div class="meta-label">Status</div>
-                <div style="margin-top:3px;"><span class="status-badge">{{ ucfirst($order->status) }}</span></div>
-            </td>
-        </tr>
-    </table>
+        <div class="rule"></div>
 
-    <div class="delivery">
-        <h3>Delivery Information</h3>
-        <div style="font-size:12px;color:#374151;">{{ $order->shipping_address }}</div>
-        <div style="font-size:11px;color:#6b7280;margin-top:4px;">Contact: {{ $order->contact_number }}</div>
-        @if($order->notes)<div style="font-size:11px;color:#6b7280;margin-top:4px;">Notes: {{ $order->notes }}</div>@endif
-    </div>
-
-    <table>
-        <thead>
+        <table class="meta">
             <tr>
-                <th>Product</th>
-                <th style="text-align:center;">Qty</th>
-                <th style="text-align:right;">Unit Price</th>
-                <th style="text-align:right;">Subtotal</th>
+                <td class="label">Order No.</td>
+                <td>: {{ $order->order_number }}</td>
             </tr>
-        </thead>
-        <tbody>
-            @foreach($order->items as $item)
             <tr>
-                <td>{{ $item->product_name }}</td>
-                <td style="text-align:center;">{{ $item->quantity }}</td>
-                <td style="text-align:right;">₱{{ number_format($item->unit_price, 2) }}</td>
-                <td style="text-align:right;">₱{{ number_format($item->subtotal, 2) }}</td>
+                <td class="label">Date</td>
+                <td>: {{ $order->created_at->format('Y-m-d H:i') }}</td>
             </tr>
-            @endforeach
-            <tr class="total-row">
-                <td colspan="3" style="text-align:right;">Total Amount</td>
-                <td style="text-align:right;" class="total-amount">₱{{ number_format($order->total_amount, 2) }}</td>
+            <tr>
+                <td class="label">Status</td>
+                <td>: {{ strtoupper($order->status) }}</td>
             </tr>
-        </tbody>
-    </table>
+            <tr>
+                <td class="label">Customer</td>
+                <td>: {{ $order->user->name }}</td>
+            </tr>
+            <tr>
+                <td class="label">Email</td>
+                <td>: {{ $order->user->email }}</td>
+            </tr>
+            <tr>
+                <td class="label">Contact</td>
+                <td>: {{ $order->contact_number }}</td>
+            </tr>
+            <tr>
+                <td class="label">Address</td>
+                <td>: {{ $order->shipping_address }}</td>
+            </tr>
+            @if($order->notes)
+            <tr>
+                <td class="label">Notes</td>
+                <td>: {{ $order->notes }}</td>
+            </tr>
+            @endif
+        </table>
 
-    <div class="footer">
-        <p>Thank you for supporting Philippine agriculture through Tanim!</p>
-        <p style="margin-top:6px;">This is a computer-generated receipt. No signature required.</p>
-        <p style="margin-top:6px;">Tanim Agricultural Marketplace · Developed by Pabalan &amp; Llegado · TUP-Taguig</p>
+        <div class="rule"></div>
+
+        <table class="item-table">
+            <thead>
+                <tr>
+                    <th style="width:48%;">Product</th>
+                    <th class="t-center" style="width:10%;">Qty</th>
+                    <th class="t-right" style="width:21%;">Unit Price</th>
+                    <th class="t-right" style="width:21%;">Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($order->items as $item)
+                <tr>
+                    <td>{{ $item->product_name }}</td>
+                    <td class="t-center">{{ $item->quantity }}</td>
+                    <td class="t-right">{{ number_format($item->unit_price, 2) }}</td>
+                    <td class="t-right">{{ number_format($item->subtotal, 2) }}</td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="4" class="center">No line items found.</td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
+
+        <table class="totals">
+            <tr>
+                <td class="t-right" style="width:78%;">Subtotal</td>
+                <td class="t-right" style="width:22%;">{{ number_format($order->total_amount, 2) }}</td>
+            </tr>
+            <tr>
+                <td class="t-right">Tax</td>
+                <td class="t-right">0.00</td>
+            </tr>
+            <tr class="grand">
+                <td class="t-right">TOTAL AMOUNT</td>
+                <td class="t-right">{{ number_format($order->total_amount, 2) }}</td>
+            </tr>
+        </table>
+
+        <div class="rule"></div>
+
+        <div class="footer">
+            <p>This receipt is generated electronically and is valid for printing.</p>
+            <p>Thank you for your order.</p>
+        </div>
     </div>
 </body>
 </html>

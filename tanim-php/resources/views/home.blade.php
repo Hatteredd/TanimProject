@@ -50,8 +50,8 @@
                     </select>
                     <select name="brand" class="input" style="background:rgba(255,255,255,.95);">
                         <option value="">All Brands</option>
-                        @foreach($brands as $brand)
-                        <option value="{{ $brand }}" {{ request('brand') === $brand ? 'selected' : '' }}>{{ $brand }}</option>
+                        @foreach($brands as $brandId => $brandName)
+                        <option value="{{ $brandId }}" {{ (string) request('brand') === (string) $brandId ? 'selected' : '' }}>{{ $brandName }}</option>
                         @endforeach
                     </select>
                 </div>

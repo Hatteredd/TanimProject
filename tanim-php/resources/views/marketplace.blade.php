@@ -61,8 +61,8 @@
             <label class="label">Brand</label>
             <select name="brand" class="input">
                 <option value="">All Brands</option>
-                @foreach($brands as $brand)
-                <option value="{{ $brand }}" {{ request('brand') == $brand ? 'selected' : '' }}>{{ $brand }}</option>
+                @foreach($brands as $brandId => $brandName)
+                <option value="{{ $brandId }}" {{ (string) request('brand') === (string) $brandId ? 'selected' : '' }}>{{ $brandName }}</option>
                 @endforeach
             </select>
         </div>
@@ -100,7 +100,7 @@
     <p style="font-size:0.875rem;color:var(--text-muted);margin-bottom:1.25rem;">
         Showing <strong style="color:var(--text);">{{ $products->total() }}</strong> products
         @if(request('category')) in <strong style="color:var(--primary);">{{ request('category') }}</strong> @endif
-        @if(request('brand')) · brand: <strong style="color:var(--primary);">{{ request('brand') }}</strong> @endif
+        @if(request('brand')) · brand: <strong style="color:var(--primary);">{{ $brands->get((int) request('brand'), 'Unknown Supplier') }}</strong> @endif
         @if(request('type')) · type: <strong style="color:var(--primary);">{{ request('type') }}</strong> @endif
     </p>
 

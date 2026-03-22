@@ -40,6 +40,12 @@
             <p style="font-size:13px;color:#6b7280;margin:4px 0 0;">📞 {{ $order->contact_number }}</p>
         </div>
 
+        <div style="text-align:center;margin-top:18px;">
+            <a href="{{ route('orders.receipt', $order) }}" style="display:inline-block;background:#111827;color:#ffffff;text-decoration:none;font-size:13px;font-weight:700;padding:10px 18px;border-radius:8px;">
+                Download / Print Receipt
+            </a>
+        </div>
+
         <p style="font-size:13px;color:#6b7280;margin:20px 0 0;line-height:1.6;">
             A PDF receipt is attached to this email. You can also view your order status anytime by logging into your Tanim account.
         </p>

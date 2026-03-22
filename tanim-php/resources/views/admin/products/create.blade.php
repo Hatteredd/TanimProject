@@ -21,8 +21,19 @@
                     </select>
                 </div>
                 <div>
-                    <label class="label">Brand</label>
-                    <input name="brand" type="text" class="input" value="{{ old('brand') }}" placeholder="e.g. Tanim Fresh" />
+                    <label class="label">Supplier</label>
+                    <select name="supplier_id" id="supplier_id" class="input" required>
+                        <option value="">Select supplier</option>
+                        @foreach($suppliers as $supplier)
+                        <option
+                            value="{{ $supplier->id }}"
+                            data-location="{{ $supplier->location }}"
+                            {{ (string) old('supplier_id') === (string) $supplier->id ? 'selected' : '' }}
+                        >
+                            {{ $supplier->name }}
+                        </option>
+                        @endforeach
+                    </select>
                 </div>
                 <div>
                     <label class="label">Type</label>
@@ -45,8 +56,8 @@
                     <input name="stock" type="number" min="0" class="input" value="{{ old('stock',0) }}" required />
                 </div>
                 <div>
-                    <label class="label">Farm Location</label>
-                    <input name="farm_location" type="text" class="input" value="{{ old('farm_location') }}" placeholder="e.g. Benguet, Philippines" />
+                    <label class="label">Farm Location (from supplier)</label>
+                    <input id="supplier_location_preview" type="text" class="input" value="" readonly />
                 </div>
                 <div>
                     <label class="label">Harvest Date</label>
@@ -88,8 +99,18 @@ const dropZone = document.getElementById('drop-zone-create');
 const fileInput = document.getElementById('photos-input-create');
 const preview = document.getElementById('preview-create');
 const form = document.getElementById('product-form');
+const supplierSelect = document.getElementById('supplier_id');
+const supplierLocationPreview = document.getElementById('supplier_location_preview');
 const maxFiles = 3;
 let selectedFiles = [];
+
+function syncSupplierPreview() {
+    const selected = supplierSelect.options[supplierSelect.selectedIndex];
+    supplierLocationPreview.value = selected?.dataset?.location || '';
+}
+
+supplierSelect.addEventListener('change', syncSupplierPreview);
+syncSupplierPreview();
 
 function updatePreview(files) {
     selectedFiles = Array.from(files).slice(0, maxFiles);

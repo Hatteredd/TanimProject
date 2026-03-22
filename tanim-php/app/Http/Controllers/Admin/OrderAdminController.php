@@ -13,7 +13,7 @@ class OrderAdminController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Order::with('user')->latest();
+        $query = Order::with('user')->withComputedTotal()->latest();
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);
@@ -62,9 +62,10 @@ class OrderAdminController extends Controller
     public function charts()
     {
         // Yearly sales by month
-        $yearlySales = Order::whereYear('created_at', now()->year)
-            ->whereNotIn('status', ['cancelled'])
-            ->selectRaw('MONTH(created_at) as month, SUM(total_amount) as total, COUNT(*) as count')
+        $yearlySales = Order::leftJoin('order_items', 'orders.id', '=', 'order_items.order_id')
+            ->whereYear('orders.created_at', now()->year)
+            ->whereNotIn('orders.status', ['cancelled'])
+            ->selectRaw('MONTH(orders.created_at) as month, COALESCE(SUM(order_items.unit_price * order_items.quantity), 0) as total, COUNT(DISTINCT orders.id) as count')
             ->groupBy('month')
             ->orderBy('month')
             ->get()
@@ -80,7 +81,7 @@ class OrderAdminController extends Controller
         }
 
         // Sales per product (top 10)
-        $productSales = \App\Models\OrderItem::selectRaw('product_name, SUM(subtotal) as total, SUM(quantity) as qty')
+        $productSales = \App\Models\OrderItem::selectRaw('product_name, SUM(unit_price * quantity) as total, SUM(quantity) as qty')
             ->groupBy('product_name')
             ->orderByDesc('total')
             ->limit(10)
@@ -94,9 +95,10 @@ class OrderAdminController extends Controller
         $from = $request->input('from', now()->startOfMonth()->toDateString());
         $to   = $request->input('to', now()->toDateString());
 
-        $sales = Order::whereBetween('created_at', [$from . ' 00:00:00', $to . ' 23:59:59'])
-            ->whereNotIn('status', ['cancelled'])
-            ->selectRaw('DATE(created_at) as date, SUM(total_amount) as total, COUNT(*) as count')
+        $sales = Order::leftJoin('order_items', 'orders.id', '=', 'order_items.order_id')
+            ->whereBetween('orders.created_at', [$from . ' 00:00:00', $to . ' 23:59:59'])
+            ->whereNotIn('orders.status', ['cancelled'])
+            ->selectRaw('DATE(orders.created_at) as date, COALESCE(SUM(order_items.unit_price * order_items.quantity), 0) as total, COUNT(DISTINCT orders.id) as count')
             ->groupBy('date')
             ->orderBy('date')
             ->get();
@@ -107,7 +109,9 @@ class OrderAdminController extends Controller
     private function generateReceiptPdf(Order $order): ?string
     {
         try {
-            $pdf = Pdf::loadView('pdf.receipt', compact('order'));
+            $order->load('items.product', 'user');
+            $pdf = Pdf::loadView('pdf.receipt', compact('order'))
+                ->setPaper($this->receiptPaperSize($order), 'portrait');
             $path = storage_path('app/receipts/receipt-' . $order->order_number . '.pdf');
 
             if (!is_dir(storage_path('app/receipts'))) {
@@ -120,5 +124,19 @@ class OrderAdminController extends Controller
             logger()->error('Status receipt generation failed: ' . $e->getMessage());
             return null;
         }
+    }
+
+    private function receiptPaperSize(Order $order): array
+    {
+        // Slightly wider receipt paper to avoid clipping in PDF renderers.
+        $widthMm = 105;
+        $baseHeightMm = 130;
+        $perItemMm = 8;
+        $notesMm = filled($order->notes) ? 12 : 0;
+        $heightMm = max(140, $baseHeightMm + ($order->items->count() * $perItemMm) + $notesMm);
+
+        $mmToPt = 2.83464567;
+
+        return [0, 0, $widthMm * $mmToPt, $heightMm * $mmToPt];
     }
 }
