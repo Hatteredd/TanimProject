@@ -36,6 +36,7 @@
         <div style="padding:16px;background:#f9fafb;border-radius:8px;">
             <p style="font-size:12px;font-weight:700;color:#9ca3af;text-transform:uppercase;margin:0 0 6px;">Order Total</p>
             <p style="font-size:18px;font-weight:900;color:#15803d;margin:0;">₱{{ number_format($order->total_amount, 2) }}</p>
+            <p style="font-size:13px;color:#6b7280;margin:6px 0 0;">Payment Method: {{ $order->paymentMethodLabel() }}</p>
         </div>
 
         <div style="text-align:center;margin-top:18px;">

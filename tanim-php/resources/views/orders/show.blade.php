@@ -48,6 +48,13 @@
             <div style="display:grid;gap:0.75rem;">
                 <div><span style="font-size:0.75rem;font-weight:700;color:var(--text-light);text-transform:uppercase;">Shipping Address</span><p style="font-size:0.9rem;color:var(--text);margin:0.2rem 0 0;">{{ $order->shipping_address }}</p></div>
                 <div><span style="font-size:0.75rem;font-weight:700;color:var(--text-light);text-transform:uppercase;">Contact</span><p style="font-size:0.9rem;color:var(--text);margin:0.2rem 0 0;">{{ $order->contact_number }}</p></div>
+                <div>
+                    <span style="font-size:0.75rem;font-weight:700;color:var(--text-light);text-transform:uppercase;">Payment Method</span>
+                    <p style="font-size:0.9rem;color:var(--text);margin:0.2rem 0 0;">{{ $order->paymentMethodLabel() }}</p>
+                    @if($order->paymentMethodDetails())
+                    <p style="font-size:0.78rem;color:var(--text-muted);margin:0.15rem 0 0;">{{ $order->paymentMethodDetails() }}</p>
+                    @endif
+                </div>
                 @if($order->notes)<div><span style="font-size:0.75rem;font-weight:700;color:var(--text-light);text-transform:uppercase;">Notes</span><p style="font-size:0.9rem;color:var(--text);margin:0.2rem 0 0;">{{ $order->notes }}</p></div>@endif
                 <div><span style="font-size:0.75rem;font-weight:700;color:var(--text-light);text-transform:uppercase;">Placed On</span><p style="font-size:0.9rem;color:var(--text);margin:0.2rem 0 0;">{{ $order->created_at->format('F d, Y h:i A') }}</p></div>
             </div>

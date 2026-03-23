@@ -103,6 +103,11 @@ class ReportController extends Controller
         $ordersBase = Order::query()
             ->whereBetween('orders.created_at', [$fromDate, $toDate]);
 
+        $effectiveTotalSql = "CASE
+            WHEN orders.total_amount IS NOT NULL AND orders.total_amount > 0 THEN orders.total_amount
+            ELSE ((SELECT COALESCE(SUM(oi.unit_price * oi.quantity), 0) FROM order_items oi WHERE oi.order_id = orders.id) * " . (1 + Order::VAT_RATE) . " + " . Order::SHIPPING_FEE . ")
+        END";
+
         if ($statusFilter) {
             $ordersBase->where('orders.status', $statusFilter);
         }
@@ -118,9 +123,8 @@ class ReportController extends Controller
         }
 
         $salesQuery = Order::query()
-            ->leftJoin('order_items', 'orders.id', '=', 'order_items.order_id')
             ->whereBetween('orders.created_at', [$fromDate, $toDate])
-            ->selectRaw("{$periodExpr} as period, COALESCE(SUM(order_items.unit_price * order_items.quantity), 0) as total, COUNT(DISTINCT orders.id) as count")
+            ->selectRaw("{$periodExpr} as period, COALESCE(SUM({$effectiveTotalSql}), 0) as total, COUNT(*) as count")
             ->groupBy('period')
             ->orderBy('period');
 
@@ -131,8 +135,13 @@ class ReportController extends Controller
         }
 
         if ($categoryFilter) {
-            $salesQuery->join('products', 'order_items.product_id', '=', 'products.id')
-                ->where('products.category', $categoryFilter);
+            $salesQuery->whereExists(function ($q) use ($categoryFilter) {
+                $q->selectRaw('1')
+                    ->from('order_items as oi')
+                    ->join('products as p', 'oi.product_id', '=', 'p.id')
+                    ->whereColumn('oi.order_id', 'orders.id')
+                    ->where('p.category', $categoryFilter);
+            });
         }
 
         $salesBuckets = $salesQuery->get()->keyBy('period');
@@ -177,12 +186,19 @@ class ReportController extends Controller
             ];
         })->values()->all();
 
-        $totalRevenue = (float) (OrderItem::query()
-            ->join('orders', 'order_items.order_id', '=', 'orders.id')
+        $totalRevenue = (float) (Order::query()
             ->whereBetween('orders.created_at', [$fromDate, $toDate])
             ->when($statusFilter, fn ($q) => $q->where('orders.status', $statusFilter), fn ($q) => $q->whereNotIn('orders.status', ['cancelled']))
-            ->when($categoryFilter, fn ($q) => $q->join('products', 'order_items.product_id', '=', 'products.id')->where('products.category', $categoryFilter))
-            ->selectRaw('COALESCE(SUM(order_items.unit_price * order_items.quantity), 0) as total')
+            ->when($categoryFilter, function ($q) use ($categoryFilter) {
+                $q->whereExists(function ($sub) use ($categoryFilter) {
+                    $sub->selectRaw('1')
+                        ->from('order_items as oi')
+                        ->join('products as p', 'oi.product_id', '=', 'p.id')
+                        ->whereColumn('oi.order_id', 'orders.id')
+                        ->where('p.category', $categoryFilter);
+                });
+            })
+            ->selectRaw("COALESCE(SUM({$effectiveTotalSql}), 0) as total")
             ->value('total') ?? 0);
 
         $totalOrders = (clone $ordersBase)->count();
@@ -192,21 +208,20 @@ class ReportController extends Controller
             ->when($roleFilter !== 'all', fn ($q) => $q->where('role', $roleFilter))
             ->count();
 
-        $avgOrderValue = (float) (DB::query()
-            ->fromSub(
-                Order::query()
-                    ->leftJoin('order_items', 'orders.id', '=', 'order_items.order_id')
-                    ->whereBetween('orders.created_at', [$fromDate, $toDate])
-                    ->when($statusFilter, fn ($q) => $q->where('orders.status', $statusFilter), fn ($q) => $q->whereNotIn('orders.status', ['cancelled']))
-                    ->when($categoryFilter, function ($q) use ($categoryFilter) {
-                        $q->join('products', 'order_items.product_id', '=', 'products.id')
-                            ->where('products.category', $categoryFilter);
-                    })
-                    ->groupBy('orders.id')
-                    ->selectRaw('COALESCE(SUM(order_items.unit_price * order_items.quantity), 0) as order_total'),
-                'order_totals'
-            )
-            ->avg('order_total') ?? 0);
+        $avgOrderValue = (float) (Order::query()
+            ->whereBetween('orders.created_at', [$fromDate, $toDate])
+            ->when($statusFilter, fn ($q) => $q->where('orders.status', $statusFilter), fn ($q) => $q->whereNotIn('orders.status', ['cancelled']))
+            ->when($categoryFilter, function ($q) use ($categoryFilter) {
+                $q->whereExists(function ($sub) use ($categoryFilter) {
+                    $sub->selectRaw('1')
+                        ->from('order_items as oi')
+                        ->join('products as p', 'oi.product_id', '=', 'p.id')
+                        ->whereColumn('oi.order_id', 'orders.id')
+                        ->where('p.category', $categoryFilter);
+                });
+            })
+            ->selectRaw("AVG({$effectiveTotalSql}) as avg_total")
+            ->value('avg_total') ?? 0);
 
         $ordersByStatus = (clone $ordersBase)
             ->selectRaw('orders.status, COUNT(*) as count')

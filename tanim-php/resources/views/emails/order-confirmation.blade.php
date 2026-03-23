@@ -38,6 +38,7 @@
             <p style="font-size:12px;font-weight:700;color:#9ca3af;text-transform:uppercase;margin:0 0 6px;">Delivery Address</p>
             <p style="font-size:14px;color:#374151;margin:0;">{{ $order->shipping_address }}</p>
             <p style="font-size:13px;color:#6b7280;margin:4px 0 0;">📞 {{ $order->contact_number }}</p>
+            <p style="font-size:13px;color:#6b7280;margin:4px 0 0;">💳 {{ $order->paymentMethodLabel() }}</p>
         </div>
 
         <div style="text-align:center;margin-top:18px;">

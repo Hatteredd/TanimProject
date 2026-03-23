@@ -20,6 +20,10 @@
     <div class="alert-success" style="margin-bottom:1.5rem;">&#10003; {{ session('cart_success') }}</div>
     @endif
 
+    @if(session('error'))
+    <div class="alert-error" style="margin-bottom:1.5rem;">{{ session('error') }}</div>
+    @endif
+
     @if($items->isEmpty())
     <div class="page-card" style="padding:4rem;text-align:center;">
         <div style="font-size:4rem;margin-bottom:1rem;">&#128722;</div>

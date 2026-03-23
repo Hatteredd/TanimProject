@@ -127,6 +127,10 @@
                 <td>: {{ $order->contact_number }}</td>
             </tr>
             <tr>
+                <td class="label">Payment</td>
+                <td>: {{ $order->paymentMethodLabel() }}</td>
+            </tr>
+            <tr>
                 <td class="label">Address</td>
                 <td>: {{ $order->shipping_address }}</td>
             </tr>
@@ -166,21 +170,17 @@
         </table>
 
         <table class="totals">
-            @php
-                $subtotal = ($order->total_amount - 100) / 1.12;
-                $tax = $subtotal * 0.12;
-            @endphp
             <tr>
                 <td class="t-right" style="width:78%;">Subtotal</td>
-                <td class="t-right" style="width:22%;">₱{{ number_format($subtotal, 2) }}</td>
+                <td class="t-right" style="width:22%;">₱{{ number_format($order->subtotal, 2) }}</td>
             </tr>
             <tr>
                 <td class="t-right">VAT (12%)</td>
-                <td class="t-right">₱{{ number_format($tax, 2) }}</td>
+                <td class="t-right">₱{{ number_format($order->vat_amount, 2) }}</td>
             </tr>
             <tr>
                 <td class="t-right">Shipping Fee</td>
-                <td class="t-right">₱100.00</td>
+                <td class="t-right">₱{{ number_format($order->shipping_fee, 2) }}</td>
             </tr>
             <tr class="grand">
                 <td class="t-right">TOTAL AMOUNT</td>

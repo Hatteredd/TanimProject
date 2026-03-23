@@ -58,7 +58,7 @@
         <table style="width:100%;border-collapse:collapse;font-size:.82rem;min-width:700px;">
             <thead>
                 <tr style="border-bottom:2px solid var(--border);">
-                    @foreach(['Supplier','Location','Specialty','Contact','Status',''] as $heading)
+                    @foreach(['Supplier','Location','Specialty','Contact','Notes','Status',''] as $heading)
                     <th style="padding:.6rem .75rem;text-align:left;font-size:.7rem;font-weight:800;color:var(--text-muted);text-transform:uppercase;white-space:nowrap;">{{ $heading }}</th>
                     @endforeach
                 </tr>
@@ -68,13 +68,11 @@
                 <tr style="border-bottom:1px solid var(--border);" onmouseover="this.style.background='var(--primary-faint)'" onmouseout="this.style.background='transparent'">
                     <td style="padding:.7rem .75rem;">
                         <p style="font-weight:700;color:var(--text);margin:0;">{{ $supplier->name }}</p>
-                        @if($supplier->notes)
-                        <p style="font-size:.72rem;color:var(--text-muted);margin:.15rem 0 0;">{{ $supplier->notes }}</p>
-                        @endif
                     </td>
                     <td style="padding:.7rem .75rem;color:var(--text-muted);">{{ $supplier->location }}</td>
                     <td style="padding:.7rem .75rem;color:var(--text-muted);">{{ $supplier->specialty ?: '—' }}</td>
                     <td style="padding:.7rem .75rem;color:var(--text-muted);">{{ $supplier->contact_number ?: '—' }}</td>
+                    <td style="padding:.7rem .75rem;color:var(--text-muted);max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ $supplier->notes ?: '—' }}</td>
                     <td style="padding:.7rem .75rem;">
                         <span style="font-size:.7rem;font-weight:800;padding:.2rem .6rem;border-radius:9999px;background:{{ $supplier->status==='active' ? 'var(--primary-soft)' : 'rgba(220,38,38,.1)' }};color:{{ $supplier->status==='active' ? 'var(--primary-text)' : '#dc2626' }};">
                             {{ ucfirst($supplier->status) }}
@@ -88,7 +86,7 @@
                     </td>
                 </tr>
                 @empty
-                <tr><td colspan="6" style="padding:2rem;text-align:center;color:var(--text-muted);">No suppliers found.</td></tr>
+                <tr><td colspan="7" style="padding:2rem;text-align:center;color:var(--text-muted);">No suppliers found.</td></tr>
                 @endforelse
             </tbody>
         </table>

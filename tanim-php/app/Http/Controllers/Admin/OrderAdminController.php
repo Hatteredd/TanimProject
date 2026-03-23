@@ -61,11 +61,16 @@ class OrderAdminController extends Controller
 
     public function charts()
     {
+        $effectiveTotalSql = "CASE
+            WHEN orders.total_amount IS NOT NULL AND orders.total_amount > 0 THEN orders.total_amount
+            ELSE ((SELECT COALESCE(SUM(oi.unit_price * oi.quantity), 0) FROM order_items oi WHERE oi.order_id = orders.id) * " . (1 + Order::VAT_RATE) . " + " . Order::SHIPPING_FEE . ")
+        END";
+
         // Yearly sales by month
-        $yearlySales = Order::leftJoin('order_items', 'orders.id', '=', 'order_items.order_id')
+        $yearlySales = Order::query()
             ->whereYear('orders.created_at', now()->year)
             ->whereNotIn('orders.status', ['cancelled'])
-            ->selectRaw('MONTH(orders.created_at) as month, COALESCE(SUM(order_items.unit_price * order_items.quantity), 0) as total, COUNT(DISTINCT orders.id) as count')
+            ->selectRaw("MONTH(orders.created_at) as month, COALESCE(SUM({$effectiveTotalSql}), 0) as total, COUNT(*) as count")
             ->groupBy('month')
             ->orderBy('month')
             ->get()
@@ -95,10 +100,15 @@ class OrderAdminController extends Controller
         $from = $request->input('from', now()->startOfMonth()->toDateString());
         $to   = $request->input('to', now()->toDateString());
 
-        $sales = Order::leftJoin('order_items', 'orders.id', '=', 'order_items.order_id')
+        $effectiveTotalSql = "CASE
+            WHEN orders.total_amount IS NOT NULL AND orders.total_amount > 0 THEN orders.total_amount
+            ELSE ((SELECT COALESCE(SUM(oi.unit_price * oi.quantity), 0) FROM order_items oi WHERE oi.order_id = orders.id) * " . (1 + Order::VAT_RATE) . " + " . Order::SHIPPING_FEE . ")
+        END";
+
+        $sales = Order::query()
             ->whereBetween('orders.created_at', [$from . ' 00:00:00', $to . ' 23:59:59'])
             ->whereNotIn('orders.status', ['cancelled'])
-            ->selectRaw('DATE(orders.created_at) as date, COALESCE(SUM(order_items.unit_price * order_items.quantity), 0) as total, COUNT(DISTINCT orders.id) as count')
+            ->selectRaw("DATE(orders.created_at) as date, COALESCE(SUM({$effectiveTotalSql}), 0) as total, COUNT(*) as count")
             ->groupBy('date')
             ->orderBy('date')
             ->get();

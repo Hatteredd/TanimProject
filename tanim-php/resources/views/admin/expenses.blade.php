@@ -76,7 +76,7 @@
             <table style="width:100%;border-collapse:collapse;font-size:.85rem;">
                 <thead>
                     <tr style="border-bottom:2px solid var(--border);">
-                        @foreach(['Date','Type','Label','Amount','Recurring',''] as $h)
+                        @foreach(['Date','Type','Label','Notes','Amount','Recurring',''] as $h)
                         <th style="padding:.6rem .75rem;text-align:left;font-size:.72rem;font-weight:800;color:var(--text-muted);text-transform:uppercase;white-space:nowrap;">{{ $h }}</th>
                         @endforeach
                     </tr>
@@ -87,6 +87,7 @@
                         <td style="padding:.65rem .75rem;color:var(--text-muted);white-space:nowrap;">{{ $exp->expense_date->format('M d, Y') }}</td>
                         <td style="padding:.65rem .75rem;"><span class="badge">{{ \App\Models\Expense::types()[$exp->type] ?? $exp->type }}</span></td>
                         <td style="padding:.65rem .75rem;color:var(--text);font-weight:600;">{{ $exp->label }}</td>
+                        <td style="padding:.65rem .75rem;color:var(--text-muted);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ $exp->notes ?: '—' }}</td>
                         <td style="padding:.65rem .75rem;font-weight:800;color:var(--danger);white-space:nowrap;">₱{{ number_format($exp->amount,2) }}</td>
                         <td style="padding:.65rem .75rem;color:var(--text-muted);">{{ $exp->recurring ? '🔄 '.$exp->recurring_period : '—' }}</td>
                         <td style="padding:.65rem .75rem;">
@@ -97,7 +98,7 @@
                         </td>
                     </tr>
                     @empty
-                    <tr><td colspan="6" style="padding:2rem;text-align:center;color:var(--text-muted);">No expenses found.</td></tr>
+                    <tr><td colspan="7" style="padding:2rem;text-align:center;color:var(--text-muted);">No expenses found.</td></tr>
                     @endforelse
                 </tbody>
             </table>

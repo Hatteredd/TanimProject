@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Schema;
 use RuntimeException;
 use Throwable;
 
@@ -48,11 +49,12 @@ class OrderController extends Controller
         }
 
         $subtotal = $cartItems->sum(fn($i) => $i->quantity * $i->product->price);
-        $tax = $subtotal * 0.12;
-        $shipping_fee = 100;
+        $tax = $subtotal * Order::VAT_RATE;
+        $shipping_fee = Order::SHIPPING_FEE;
         $total = $subtotal + $tax + $shipping_fee;
+        $paymentMethods = Order::paymentMethods();
 
-        return view('orders.checkout', compact('cartItems', 'subtotal', 'tax', 'shipping_fee', 'total'));
+        return view('orders.checkout', compact('cartItems', 'subtotal', 'tax', 'shipping_fee', 'total', 'paymentMethods'));
     }
 
     public function store(Request $request)
@@ -63,6 +65,7 @@ class OrderController extends Controller
             'shipping_address' => ['required', 'string', 'max:500'],
             'contact_number'   => ['required', 'string', 'regex:/^(?:\+63|0)9\d{9}$/'],
             'notes'            => ['nullable', 'string', 'max:500'],
+            'payment_method'   => ['required', 'in:cod,gcash,bank_transfer'],
         ], [
             'contact_number.regex' => 'Please enter a valid Philippine mobile number.',
         ]);
@@ -80,11 +83,11 @@ class OrderController extends Controller
                 }
 
                 $subtotal = $cartItems->sum(fn($i) => $i->quantity * $i->product->price);
-                $tax = $subtotal * 0.12;
-                $shipping_fee = 100;
+                $tax = $subtotal * Order::VAT_RATE;
+                $shipping_fee = Order::SHIPPING_FEE;
                 $totalAmount = $subtotal + $tax + $shipping_fee;
 
-                $order = Order::create([
+                $orderPayload = [
                     'user_id'          => Auth::id(),
                     'order_number'     => Order::generateOrderNumber(),
                     'status'           => 'pending',
@@ -92,7 +95,13 @@ class OrderController extends Controller
                     'contact_number'   => $validated['contact_number'],
                     'notes'            => $validated['notes'] ?? null,
                     'total_amount'     => $totalAmount,
-                ]);
+                ];
+
+                if (Schema::hasColumn('orders', 'payment_method')) {
+                    $orderPayload['payment_method'] = $validated['payment_method'];
+                }
+
+                $order = Order::create($orderPayload);
 
                 foreach ($cartItems as $item) {
                     $product = $item->product()->lockForUpdate()->first();

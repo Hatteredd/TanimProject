@@ -8,9 +8,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Order extends Model
 {
+    public const VAT_RATE = 0.12;
+    public const SHIPPING_FEE = 100.00;
+
     protected $fillable = [
         'user_id', 'order_number', 'status',
-        'shipping_address', 'contact_number', 'notes', 'paid_at',
+        'shipping_address', 'contact_number', 'notes', 'paid_at', 'payment_method',
         'total_amount',
     ];
 
@@ -45,6 +48,34 @@ class Order extends Model
         ];
     }
 
+    public static function paymentMethods(): array
+    {
+        return [
+            'cod' => [
+                'label' => 'Cash on Delivery (COD)',
+                'details' => 'Pay in cash once the order is delivered.',
+            ],
+            'gcash' => [
+                'label' => 'GCash',
+                'details' => 'Selection only; no automatic charge is performed in-app.',
+            ],
+            'bank_transfer' => [
+                'label' => 'Bank Transfer',
+                'details' => 'Selection only; transfer arrangement is handled outside checkout.',
+            ],
+        ];
+    }
+
+    public function paymentMethodLabel(): string
+    {
+        return self::paymentMethods()[$this->payment_method]['label'] ?? 'Not specified';
+    }
+
+    public function paymentMethodDetails(): ?string
+    {
+        return self::paymentMethods()[$this->payment_method]['details'] ?? null;
+    }
+
     public function statusBg(): string
     {
         return self::statusBgColors()[$this->status] ?? 'rgba(107,114,128,0.12)';
@@ -68,10 +99,36 @@ class Order extends Model
     public function scopeWithComputedTotal($query)
     {
         return $query->addSelect([
-            'total_amount' => OrderItem::query()
-                ->selectRaw('COALESCE(SUM(unit_price * quantity), 0)')
+            'computed_total_amount' => OrderItem::query()
+                ->selectRaw('COALESCE(SUM(unit_price * quantity), 0) * ? + ?', [1 + self::VAT_RATE, self::SHIPPING_FEE])
                 ->whereColumn('order_id', 'orders.id'),
         ]);
+    }
+
+    public function getSubtotalAttribute(): float
+    {
+        if ($this->relationLoaded('items')) {
+            return (float) $this->items->sum(fn (OrderItem $item) => ((float) $item->unit_price) * ((int) $item->quantity));
+        }
+
+        return (float) ($this->items()
+            ->selectRaw('COALESCE(SUM(unit_price * quantity), 0) as total')
+            ->value('total') ?? 0);
+    }
+
+    public function getVatAmountAttribute(): float
+    {
+        return $this->subtotal * self::VAT_RATE;
+    }
+
+    public function getShippingFeeAttribute(): float
+    {
+        return self::SHIPPING_FEE;
+    }
+
+    public function getCalculatedTotalAttribute(): float
+    {
+        return $this->subtotal + $this->vat_amount + $this->shipping_fee;
     }
 
     public function getTotalAmountAttribute($value): float
@@ -82,13 +139,12 @@ class Order extends Model
             return (float) $value;
         }
 
-        if ($this->relationLoaded('items')) {
-            return (float) $this->items->sum(fn (OrderItem $item) => ((float) $item->unit_price) * ((int) $item->quantity));
+        $computed = $this->attributes['computed_total_amount'] ?? null;
+        if ($computed !== null && (float) $computed > 0) {
+            return (float) $computed;
         }
 
-        return (float) ($this->items()
-            ->selectRaw('COALESCE(SUM(unit_price * quantity), 0) as total')
-            ->value('total') ?? 0);
+        return $this->calculated_total;
     }
 
     public static function generateOrderNumber(): string

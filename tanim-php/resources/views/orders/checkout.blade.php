@@ -34,6 +34,16 @@
                     <textarea name="notes" rows="2" class="input" style="resize:vertical;" placeholder="Special instructions...">{{ old('notes') }}</textarea>
                 </div>
 
+                <div>
+                    <label class="label">Payment Method *</label>
+                    <select name="payment_method" id="payment_method" required class="input" style="width:100%;">
+                        @foreach($paymentMethods as $value => $method)
+                        <option value="{{ $value }}" data-details="{{ $method['details'] }}" {{ old('payment_method', 'cod') === $value ? 'selected' : '' }}>{{ $method['label'] }}</option>
+                        @endforeach
+                    </select>
+                    <p id="payment-method-details" style="margin:0.45rem 0 0;font-size:0.78rem;color:var(--text-muted);"></p>
+                </div>
+
                 <button type="submit" class="btn-primary" style="padding:0.9rem;font-size:1rem;border-radius:0.75rem;">
                     🛒 Place Order — ₱{{ number_format($total, 2) }}
                 </button>
@@ -70,4 +80,20 @@
         </div>
     </div>
 </div>
+
+<script>
+(function () {
+    const select = document.getElementById('payment_method');
+    const details = document.getElementById('payment-method-details');
+    if (!select || !details) return;
+
+    const syncDetails = function () {
+        const option = select.options[select.selectedIndex];
+        details.textContent = option ? option.getAttribute('data-details') || '' : '';
+    };
+
+    select.addEventListener('change', syncDetails);
+    syncDetails();
+})();
+</script>
 @endsection

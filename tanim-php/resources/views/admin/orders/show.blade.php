@@ -48,6 +48,13 @@
                 <div><p style="font-size:0.72rem;font-weight:700;color:var(--text-light);text-transform:uppercase;margin:0 0 0.2rem;">Customer</p><p style="font-size:0.875rem;color:var(--text);margin:0;">{{ $order->user->name ?? 'Deleted User' }} &middot; {{ $order->user->email ?? 'N/A' }}</p></div>
                 <div><p style="font-size:0.72rem;font-weight:700;color:var(--text-light);text-transform:uppercase;margin:0 0 0.2rem;">Address</p><p style="font-size:0.875rem;color:var(--text);margin:0;">{{ $order->shipping_address }}</p></div>
                 <div><p style="font-size:0.72rem;font-weight:700;color:var(--text-light);text-transform:uppercase;margin:0 0 0.2rem;">Contact</p><p style="font-size:0.875rem;color:var(--text);margin:0;">{{ $order->contact_number }}</p></div>
+                <div>
+                    <p style="font-size:0.72rem;font-weight:700;color:var(--text-light);text-transform:uppercase;margin:0 0 0.2rem;">Payment Method</p>
+                    <p style="font-size:0.875rem;color:var(--text);margin:0;">{{ $order->paymentMethodLabel() }}</p>
+                    @if($order->paymentMethodDetails())
+                    <p style="font-size:0.76rem;color:var(--text-muted);margin:0.15rem 0 0;">{{ $order->paymentMethodDetails() }}</p>
+                    @endif
+                </div>
                 @if($order->notes)<div><p style="font-size:0.72rem;font-weight:700;color:var(--text-light);text-transform:uppercase;margin:0 0 0.2rem;">Notes</p><p style="font-size:0.875rem;color:var(--text);margin:0;">{{ $order->notes }}</p></div>@endif
             </div>
         </div>
