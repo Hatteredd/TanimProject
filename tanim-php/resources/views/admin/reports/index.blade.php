@@ -5,100 +5,106 @@
 @section('content')
 
 <style>
+/* ── Print Styles ── */
 @media print {
-    /* 1. Hide UI elements */
+    /* 1. Hide specific UI elements only */
     .admin-sidebar, 
     .admin-topbar, 
     .fixed-print-btn, 
     form, 
     .admin-breadcrumb, 
-    .btn-ghost, 
-    .btn-primary,
+    .sidebar-bottom, 
+    .sidebar-nav,
     .nav-item,
     .nav-group-label,
-    .sidebar-logo,
-    .sidebar-bottom {
+    .sidebar-logo {
         display: none !important;
+        visibility: hidden !important;
     }
 
     /* 2. Reset Layout for Print */
-    .admin-shell, .admin-main {
-        display: block !important;
-        width: 100% !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        background: white !important;
-    }
-
-    .page-content {
-        display: block !important;
-        padding: 0 !important;
-        margin: 0 !important;
-    }
-
-    /* 3. Force white background & black text */
-    body, html {
+    html, body {
         background: white !important;
         color: black !important;
-    }
-
-    /* 4. Format report containers */
-    .glass, .page-card, .stat-card, .page-wrap {
-        background: white !important;
-        border: 1px solid #eee !important;
-        box-shadow: none !important;
-        color: black !important;
-        margin-bottom: 1.5rem !important;
-        padding: 1.25rem !important;
-        break-inside: avoid;
-        display: block !important;
-        width: 100% !important;
-    }
-
-    /* 5. Force vertical stacking for all grids and flexboxes */
-    div[style*="display:grid"], 
-    div[style*="display: grid"],
-    div[style*="display:flex"],
-    div[style*="display: flex"] {
-        display: block !important;
-        width: 100% !important;
-    }
-
-    div[style*="grid-template-columns"] > div,
-    div[style*="flex-direction:column"] > div {
-        width: 100% !important;
-        margin-bottom: 1.5rem !important;
-    }
-
-    /* 6. Chart sizing */
-    canvas {
-        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
         height: auto !important;
+        width: 100% !important;
+    }
+
+    .admin-shell, .admin-main, .page-content {
+        display: block !important;
+        visibility: visible !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        position: static !important;
+    }
+
+    /* 3. Force background colors for charts and cards */
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    /* 4. Format report cards for white paper */
+    .stat-card, .glass, .page-card {
+        border: 1px solid #ddd !important;
+        background: white !important;
+        color: black !important;
+        margin-bottom: 2rem !important;
+        padding: 1.5rem !important;
+        page-break-inside: avoid !important;
+        box-shadow: none !important;
         display: block !important;
     }
 
-    /* 7. Professional Header */
+    /* 5. Force vertical stacking for grids/flex */
+    .page-content div[style*="display:grid"], 
+    .page-content div[style*="display: grid"],
+    .page-content div[style*="display:flex"],
+    .page-content div[style*="display: flex"] {
+        display: block !important;
+        width: 100% !important;
+    }
+
+    .page-content div[style*="grid-template-columns"] > div,
+    .page-content div[style*="flex-direction:column"] > div {
+        width: 100% !important;
+        margin-bottom: 2rem !important;
+    }
+
+    /* 6. Chart handling: Ensure they are large and high-contrast */
+    canvas {
+        width: 100% !important;
+        height: 350px !important;
+        display: block !important;
+        margin: 1.5rem 0 !important;
+    }
+
+    /* 7. Typography */
+    h1, h2, h3, h4, p, span, td, th {
+        color: black !important;
+    }
+
+    /* 8. Professional Header */
     .admin-main::before {
-        content: "TANIM - Agricultural Marketplace Performance Report";
+        content: "TANIM AGRICULTURAL MARKETPLACE - BUSINESS INTELLIGENCE REPORT";
         display: block;
-        font-size: 1.5rem;
-        font-weight: 800;
+        font-size: 1.8rem;
+        font-weight: 900;
         text-align: center;
         margin-bottom: 2rem;
         padding-bottom: 1rem;
-        border-bottom: 2px solid #000;
-        color: black !important;
-    }
-
-    /* 8. Text contrast */
-    h1, h2, h3, h4, p, span, td, th {
+        border-bottom: 3px solid #000;
         color: black !important;
     }
 }
 </style>
 
 {{-- Print Button (Fixed Top Right) --}}
-<button onclick="window.print()" class="btn-ghost fixed-print-btn" style="position:fixed; top:1rem; right:1.5rem; z-index:1000; padding:0.6rem 1.2rem; font-size:0.85rem; border-radius:0.75rem; display:flex; align-items:center; gap:0.5rem; background:var(--primary); color:white; border:none; box-shadow:var(--shadow-card); font-weight:800;">
+<button onclick="window.print()" class="btn-ghost fixed-print-btn" style="position:fixed; top:1rem; right:1.5rem; z-index:1000; padding:0.6rem 1.2rem; font-size:0.85rem; border-radius:0.75rem; display:flex; align-items:center; gap:0.5rem; background:var(--primary); color:white; border:none; box-shadow:0 4px 15px rgba(0,0,0,0.2); font-weight:800; cursor:pointer;">
     <span>🖨️</span> Print Report
 </button>
 
@@ -231,6 +237,8 @@
     Chart.defaults.color = textColor;
     Chart.defaults.font.family = "'Outfit', sans-serif";
     Chart.defaults.font.size = 11;
+    Chart.defaults.animation = false; // Disable animations for reliable printing
+    Chart.defaults.devicePixelRatio = 2; // High resolution for print
 
     const months      = @json(array_column($monthlyData, 'month'));
     const salesTotals = @json(array_column($monthlyData, 'total'));
@@ -277,6 +285,23 @@
         return { backgroundColor:tooltipBg, titleColor:tooltipTxt, bodyColor:tooltipTxt,
                  borderColor:gridColor, borderWidth:1, padding:10, cornerRadius:8 };
     }
+
+    // Handle Print Events to ensure graphs are visible on white paper
+    window.addEventListener('beforeprint', () => {
+        // Force charts to use dark colors for white paper
+        Chart.helpers.each(Chart.instances, (chart) => {
+            chart.options.scales.x.grid.color = 'rgba(0,0,0,0.1)';
+            chart.options.scales.y.grid.color = 'rgba(0,0,0,0.1)';
+            chart.options.plugins.legend.labels.color = '#000000';
+            if (chart.options.scales.y2) chart.options.scales.y2.grid.color = 'rgba(0,0,0,0.1)';
+            chart.update('none');
+        });
+    });
+
+    window.addEventListener('afterprint', () => {
+        // Restore original colors (refresh page is easiest to restore theme-specific colors)
+        location.reload();
+    });
 
     // 1. Monthly Sales — Line
     new Chart(document.getElementById('monthlySalesChart'), {
