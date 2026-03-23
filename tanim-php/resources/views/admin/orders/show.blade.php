@@ -45,7 +45,7 @@
         <div class="glass" style="border-radius:1.25rem;padding:1.5rem;">
             <h3 style="font-size:0.95rem;font-weight:800;color:var(--text);margin:0 0 1rem;">Delivery Details</h3>
             <div style="display:grid;gap:0.75rem;">
-                <div><p style="font-size:0.72rem;font-weight:700;color:var(--text-light);text-transform:uppercase;margin:0 0 0.2rem;">Customer</p><p style="font-size:0.875rem;color:var(--text);margin:0;">{{ $order->user->name }} &middot; {{ $order->user->email }}</p></div>
+                <div><p style="font-size:0.72rem;font-weight:700;color:var(--text-light);text-transform:uppercase;margin:0 0 0.2rem;">Customer</p><p style="font-size:0.875rem;color:var(--text);margin:0;">{{ $order->user->name ?? 'Deleted User' }} &middot; {{ $order->user->email ?? 'N/A' }}</p></div>
                 <div><p style="font-size:0.72rem;font-weight:700;color:var(--text-light);text-transform:uppercase;margin:0 0 0.2rem;">Address</p><p style="font-size:0.875rem;color:var(--text);margin:0;">{{ $order->shipping_address }}</p></div>
                 <div><p style="font-size:0.72rem;font-weight:700;color:var(--text-light);text-transform:uppercase;margin:0 0 0.2rem;">Contact</p><p style="font-size:0.875rem;color:var(--text);margin:0;">{{ $order->contact_number }}</p></div>
                 @if($order->notes)<div><p style="font-size:0.72rem;font-weight:700;color:var(--text-light);text-transform:uppercase;margin:0 0 0.2rem;">Notes</p><p style="font-size:0.875rem;color:var(--text);margin:0;">{{ $order->notes }}</p></div>@endif

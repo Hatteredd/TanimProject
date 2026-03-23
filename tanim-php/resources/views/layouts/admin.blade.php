@@ -114,7 +114,7 @@
             <a href="{{ route('admin.dashboard') }}" class="nav-item {{ $r === 'admin.dashboard' ? 'active' : '' }}">
                 <span class="nav-icon">📊</span> Dashboard
             </a>
-            <a href="{{ route('admin.reports') }}" class="nav-item {{ $r === 'admin.reports' ? 'active' : '' }}">
+            <a href="{{ route('admin.reports.index') }}" class="nav-item {{ $r === 'admin.reports.index' ? 'active' : '' }}">
                 <span class="nav-icon">📈</span> Reports & Analytics
             </a>
 
@@ -144,7 +144,7 @@
             <a href="{{ route('admin.orders.index') }}" class="nav-item {{ str_starts_with($r,'admin.orders') ? 'active' : '' }}">
                 <span class="nav-icon">📦</span> Orders
             </a>
-            <a href="{{ route('admin.expenses') }}" class="nav-item {{ $r === 'admin.expenses' ? 'active' : '' }}">
+            <a href="{{ route('admin.expenses.index') }}" class="nav-item {{ $r === 'admin.expenses.index' ? 'active' : '' }}">
                 <span class="nav-icon">💰</span> Expenses
             </a>
             <a href="{{ route('admin.suppliers') }}" class="nav-item {{ str_starts_with($r,'admin.suppliers') ? 'active' : '' }}">

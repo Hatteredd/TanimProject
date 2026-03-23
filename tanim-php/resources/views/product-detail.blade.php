@@ -607,9 +607,9 @@
             <div class="review-user-row">
                 <div style="display:flex;align-items:center;gap:0.6rem;">
                     <div style="width:2rem;height:2rem;border-radius:9999px;background:var(--primary-faint);display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:800;color:var(--primary);">
-                        {{ strtoupper(substr($review->user->name, 0, 1)) }}
+                        {{ strtoupper(substr($review->user->name ?? 'D', 0, 1)) }}
                     </div>
-                    <span class="review-name">{{ $review->user->name }}</span>
+                    <span class="review-name">{{ $review->user->name ?? 'Deleted User' }}</span>
                 </div>
                 <div style="display:flex;align-items:center;gap:0.5rem;">
                     <div style="display:flex;gap:1px;">

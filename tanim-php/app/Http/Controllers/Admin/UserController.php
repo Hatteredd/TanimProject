@@ -78,10 +78,20 @@ class UserController extends Controller
     public function destroy(User $user)
     {
         if ($user->id === auth()->id()) return back()->withErrors(['error' => 'Cannot delete your own account.']);
+        
         $name = $user->name;
+        $email = $user->email;
+        
+        // Append a unique suffix to the email to free up the original email
+        // while keeping the record in soft deletes for history/logs.
+        $user->email = $email . '.deleted.' . time();
+        $user->save();
+        
         $user->delete(); // Soft delete
-        ActivityLog::record('delete', "Admin deleted user: {$name}");
-        return back()->with('success', "User '{$name}' deleted and can be restored.");
+        
+        ActivityLog::record('delete', "Admin deleted user: {$name} (Email was: {$email})");
+        
+        return back()->with('success', "User '{$name}' deleted. Their email '{$email}' is now available for new registrations.");
     }
 
     public function deleted()

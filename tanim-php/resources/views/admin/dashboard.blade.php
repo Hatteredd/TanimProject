@@ -7,18 +7,18 @@
     {{-- KPI Grid --}}
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1.5rem;margin-bottom:2.5rem;">
         @foreach([
-            ['Total Revenue','₱'.number_format($totalRevenue,2),'var(--primary)','💰',route('admin.reports')],
+            ['Total Revenue','&#8369;'.number_format($totalRevenue,2),'var(--primary)','💰',route('admin.reports.index')],
             ['Total Orders',\App\Models\Order::count(),'var(--sky)','📦',route('admin.orders.index')],
             ['Customers',$totalCustomers,'var(--earth)','👤',route('admin.users.index')],
             ['Active Products',$totalProducts,'var(--primary-2)','🌾',route('admin.products.index')],
             ['Reviews',$totalReviews,'var(--accent)','⭐',route('admin.reviews.index')],
-            ['Avg Rating',$avgRating.'/5','var(--wheat)','🏆',route('admin.reports')],
+            ['Avg Rating',$avgRating.'/5','var(--wheat)','🏆',route('admin.reports.index')],
         ] as [$label,$val,$color,$icon,$link])
         <a href="{{ $link }}" style="text-decoration:none;">
             <div class="page-card animate-fade-in" style="padding:1.5rem;cursor:pointer;transition:all var(--transition-base);position:relative;overflow:hidden;animation-delay: {{ $loop->index * 50 }}ms">
                 <div style="position:absolute;top:-0.5rem;right:-0.5rem;font-size:3rem;opacity:0.05;transform:rotate(15deg);">{{ $icon }}</div>
                 <p style="font-size:0.7rem;font-weight:800;color:var(--text-light);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.5rem;">{{ $label }}</p>
-                <p style="font-size:1.5rem;font-weight:900;color:{{ $color }};font-family:'Outfit',sans-serif;margin:0;">{{ $val }}</p>
+                <p style="font-size:1.5rem;font-weight:900;color:{{ $color }};font-family:'Outfit',sans-serif;margin:0;">{!! $val !!}</p>
             </div>
         </a>
         @endforeach
@@ -36,10 +36,10 @@
                 <div style="display:flex;justify-content:space-between;align-items:center;padding:1rem;background:var(--bg-2);border-radius:1rem;border:1px solid var(--border);">
                     <div>
                         <p style="font-size:0.875rem;font-weight:800;color:var(--text);margin:0;">{{ $order->order_number }}</p>
-                        <p style="font-size:0.75rem;color:var(--text-muted);margin:0;">{{ $order->user->name }}</p>
+                        <p style="font-size:0.75rem;color:var(--text-muted);margin:0;">{{ $order->user->name ?? 'Deleted User' }}</p>
                     </div>
                     <div style="text-align:right;">
-                        <p style="font-size:0.9rem;font-weight:900;color:var(--primary);margin:0;">₱{{ number_format($order->total_amount,2) }}</p>
+                        <p style="font-size:0.9rem;font-weight:900;color:var(--primary);margin:0;">&#8369;{{ number_format($order->total_amount,2) }}</p>
                         <span class="badge" style="background:{{ $order->statusBg() }};color:{{ $order->statusColor() }};border:none;font-size:0.6rem;">{{ strtoupper($order->status) }}</span>
                     </div>
                 </div>
@@ -95,7 +95,7 @@
         <div class="page-card animate-fade-in" style="padding:1.5rem;animation-delay:600ms;">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
                 <h2 style="font-family:'Outfit',sans-serif;font-size:1.1rem;font-weight:800;color:var(--text);margin:0;">💰 Expenses This Month</h2>
-                <a href="{{ route('admin.expenses') }}" class="btn-ghost" style="padding:0.4rem 0.8rem;font-size:0.75rem;">View All</a>
+                <a href="{{ route('admin.expenses.index') }}" class="btn-ghost" style="padding:0.4rem 0.8rem;font-size:0.75rem;">View All</a>
             </div>
             @php $types = \App\Models\Expense::types(); $total = array_sum($expenseByType->toArray()) ?: 1; @endphp
             <div style="display:flex;flex-direction:column;gap:1.25rem;">

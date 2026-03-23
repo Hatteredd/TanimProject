@@ -11,10 +11,28 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ReportController extends Controller
 {
     public function index(Request $request)
+    {
+        $data = $this->getReportData($request);
+        ActivityLog::record('export', 'Admin viewed reports & analytics');
+
+        return view('admin.reports.index', $data);
+    }
+
+    public function downloadPdf(Request $request)
+    {
+        $data = $this->getReportData($request);
+        ActivityLog::record('export', 'Admin downloaded reports PDF');
+
+        $pdf = Pdf::loadView('pdf.admin-report', $data);
+        return $pdf->download('tanim-analytics-report-' . now()->format('Y-m-d') . '.pdf');
+    }
+
+    private function getReportData(Request $request)
     {
         $request->validate([
             'from_date' => ['nullable', 'date'],
@@ -209,15 +227,13 @@ class ReportController extends Controller
         // Monthly order count for sparkline
         $monthlyOrderCounts = array_column($monthlyData, 'count');
 
-        ActivityLog::record('export', 'Admin viewed reports & analytics');
-
-        return view('admin.reports.index', compact(
+        return compact(
             'monthlyData', 'topProducts', 'userRegData',
             'totalRevenue', 'totalOrders', 'totalCustomers', 'avgOrderValue',
             'ordersByStatus', 'categorySales', 'monthlyOrderCounts',
             'fromDate', 'toDate', 'reportType', 'statusFilter', 'roleFilter',
             'categoryFilter', 'availableCategories', 'statuses'
-        ));
+        );
     }
 
     private function buildPeriodKeys(Carbon $fromDate, Carbon $toDate, bool $groupByMonthly): array

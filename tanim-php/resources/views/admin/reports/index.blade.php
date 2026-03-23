@@ -1,7 +1,13 @@
-﻿@extends('layouts.admin')
+@extends('layouts.admin')
 @section('title','Reports')
 @section('page-title','📈 Reports & Analytics')
+
 @section('content')
+
+{{-- PDF Download Button (Fixed Top Right) --}}
+<a href="{{ route('admin.reports.pdf', request()->all()) }}" class="btn-ghost" style="position:fixed; top:1rem; right:1.5rem; z-index:1000; padding:0.6rem 1.2rem; font-size:0.85rem; border-radius:0.75rem; display:flex; align-items:center; gap:0.5rem; background:var(--primary); color:white; border:none; box-shadow:0 4px 15px rgba(0,0,0,0.2); font-weight:800; text-decoration:none;">
+    <span>📄</span> Download PDF Report
+</a>
 
 {{-- Chart.js CDN --}}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
@@ -59,22 +65,22 @@
 
     <div style="display:flex;gap:.5rem;">
         <button type="submit" class="btn-primary" style="padding:.62rem 1rem;font-size:.85rem;border-radius:.75rem;">Apply Filters</button>
-        <a href="{{ route('admin.reports') }}" class="btn-primary" style="padding:.62rem 1rem;font-size:.85rem;border-radius:.75rem;text-decoration:none;background:var(--bg);color:var(--text-muted);border:1px solid var(--border);">Reset</a>
+        <a href="{{ route('admin.reports.index') }}" class="btn-primary" style="padding:.62rem 1rem;font-size:.85rem;border-radius:.75rem;text-decoration:none;background:var(--bg);color:var(--text-muted);border:1px solid var(--border);">Reset</a>
     </div>
 </form>
 
 {{-- Summary KPIs --}}
 <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;margin-bottom:2rem;">
 @foreach([
-    ['Total Revenue','₱'.number_format($totalRevenue,2),'var(--primary)','💰'],
+    ['Total Revenue','&#8369;'.number_format($totalRevenue,2),'var(--primary)','💰'],
     ['Total Orders',$totalOrders,'var(--sky)','📦'],
     ['Customers',$totalCustomers,'var(--earth)','👤'],
-    ['Avg Order Value','₱'.number_format($avgOrderValue,2),'var(--wheat-2)','📊'],
+    ['Avg Order Value','&#8369;'.number_format($avgOrderValue,2),'var(--wheat-2)','📊'],
 ] as [$label,$val,$color,$icon])
 <div class="stat-card">
     <span style="font-size:1.4rem;display:block;margin-bottom:.4rem;">{{ $icon }}</span>
     <p style="font-size:.68rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin:0 0 .2rem;">{{ $label }}</p>
-    <p style="font-size:1.15rem;font-weight:900;color:{{ $color }};font-family:'Outfit',sans-serif;margin:0;">{{ $val }}</p>
+    <p style="font-size:1.15rem;font-weight:900;color:{{ $color }};font-family:'Outfit',sans-serif;margin:0;">{!! $val !!}</p>
 </div>
 @endforeach
 </div>
@@ -85,7 +91,7 @@
     <div class="glass" style="border-radius:1.25rem;padding:1.25rem;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
             <h2 style="font-family:'Outfit',sans-serif;font-size:.95rem;font-weight:800;color:var(--text);margin:0;">📅 Sales Trend — {{ $fromDate->format('M d, Y') }} to {{ $toDate->format('M d, Y') }}</h2>
-            <span style="font-size:.72rem;font-weight:700;color:var(--primary);">₱{{ number_format($totalRevenue,0) }} total</span>
+            <span style="font-size:.72rem;font-weight:700;color:var(--primary);">&#8369;{{ number_format($totalRevenue,0) }} total</span>
         </div>
         <canvas id="monthlySalesChart" height="220"></canvas>
     </div>
@@ -132,6 +138,8 @@
     Chart.defaults.color = textColor;
     Chart.defaults.font.family = "'Outfit', sans-serif";
     Chart.defaults.font.size = 11;
+    Chart.defaults.animation = false; // Disable animations for reliable printing
+    Chart.defaults.devicePixelRatio = 2; // High resolution for print
 
     const months      = @json(array_column($monthlyData, 'month'));
     const salesTotals = @json(array_column($monthlyData, 'total'));
@@ -179,11 +187,28 @@
                  borderColor:gridColor, borderWidth:1, padding:10, cornerRadius:8 };
     }
 
+    // Handle Print Events to ensure graphs are visible on white paper
+    window.addEventListener('beforeprint', () => {
+        // Force charts to use dark colors for white paper
+        Chart.helpers.each(Chart.instances, (chart) => {
+            chart.options.scales.x.grid.color = 'rgba(0,0,0,0.1)';
+            chart.options.scales.y.grid.color = 'rgba(0,0,0,0.1)';
+            chart.options.plugins.legend.labels.color = '#000000';
+            if (chart.options.scales.y2) chart.options.scales.y2.grid.color = 'rgba(0,0,0,0.1)';
+            chart.update('none');
+        });
+    });
+
+    window.addEventListener('afterprint', () => {
+        // Restore original colors (refresh page is easiest to restore theme-specific colors)
+        location.reload();
+    });
+
     // 1. Monthly Sales — Line
     new Chart(document.getElementById('monthlySalesChart'), {
         type: 'line',
         data: { labels: months, datasets: [
-            { label:'Revenue (₱)', data:salesTotals, borderColor:'#4ade80',
+            { label:'Revenue (\u20B1)', data:salesTotals, borderColor:'#4ade80',
               backgroundColor:'rgba(74,222,128,0.15)', borderWidth:2.5,
               pointBackgroundColor:'#4ade80', pointRadius:4, tension:0.4, fill:true },
             { label:'Orders', data:salesCounts, borderColor:'#38bdf8',
@@ -193,10 +218,24 @@
         ]},
         options: {
             responsive:true, interaction:{mode:'index',intersect:false},
-            plugins:{ legend:{position:'bottom',labels:{boxWidth:12,padding:12}}, tooltip:tip() },
+            plugins:{ 
+                legend:{position:'bottom',labels:{boxWidth:12,padding:12}}, 
+                tooltip:{
+                    ...tip(),
+                    callbacks:{
+                        label:function(ctx){
+                            let l = ctx.dataset.label || '';
+                            if(l) l += ': ';
+                            if(ctx.datasetIndex === 0) l += '\u20B1'+ctx.parsed.y.toLocaleString();
+                            else l += ctx.parsed.y.toLocaleString();
+                            return l;
+                        }
+                    }
+                } 
+            },
             scales:{
                 x:{grid:{color:gridColor}},
-                y:{grid:{color:gridColor}, ticks:{callback:v=>'₱'+v.toLocaleString()}},
+                y:{grid:{color:gridColor}, ticks:{callback:v=>'\u20B1'+v.toLocaleString()}},
                 y2:{position:'right', grid:{drawOnChartArea:false}, ticks:{stepSize:1}},
             }
         }
@@ -221,7 +260,7 @@
     new Chart(document.getElementById('topProductsChart'), {
         type: 'bar',
         data: { labels:topLabels, datasets:[{
-            label:'Revenue (₱)', data:topTotals, borderRadius:5,
+            label:'Revenue (\u20B1)', data:topTotals, borderRadius:5,
             backgroundColor:['rgba(74,222,128,.75)','rgba(56,189,248,.75)','rgba(161,110,60,.75)',
                 'rgba(250,204,21,.75)','rgba(167,139,250,.75)','rgba(251,146,60,.75)',
                 'rgba(34,197,94,.75)','rgba(14,165,233,.75)','rgba(239,68,68,.75)','rgba(99,102,241,.75)'],
@@ -229,9 +268,9 @@
         options:{
             indexAxis:'y', responsive:true,
             plugins:{ legend:{display:false},
-                tooltip:{...tip(), callbacks:{label:ctx=>' ₱'+ctx.parsed.x.toLocaleString()}} },
+                tooltip:{...tip(), callbacks:{label:ctx=>' \u20B1'+ctx.parsed.x.toLocaleString()}} },
             scales:{
-                x:{grid:{color:gridColor}, ticks:{callback:v=>'₱'+v.toLocaleString()}},
+                x:{grid:{color:gridColor}, ticks:{callback:v=>'\u20B1'+v.toLocaleString()}},
                 y:{grid:{color:gridColor}}
             }
         }
@@ -254,17 +293,17 @@
     new Chart(document.getElementById('categoryChart'), {
         type: 'bar',
         data: { labels:catLabels, datasets:[{
-            label:'Revenue (₱)', data:catTotals,
+            label:'Revenue (\u20B1)', data:catTotals,
             backgroundColor:'rgba(74,222,128,0.75)', borderColor:'#4ade80',
             borderWidth:1.5, borderRadius:6
         }]},
         options:{
             responsive:true,
             plugins:{ legend:{display:false},
-                tooltip:{...tip(), callbacks:{label:ctx=>' ₱'+ctx.parsed.y.toLocaleString()}} },
+                tooltip:{...tip(), callbacks:{label:ctx=>' \u20B1'+ctx.parsed.y.toLocaleString()}} },
             scales:{
                 x:{grid:{color:gridColor}},
-                y:{grid:{color:gridColor}, ticks:{callback:v=>'₱'+v.toLocaleString()}}
+                y:{grid:{color:gridColor}, ticks:{callback:v=>'\u20B1'+v.toLocaleString()}}
             }
         }
     });

@@ -154,8 +154,8 @@
                 <tr>
                     <td>{{ $item->product_name }}</td>
                     <td class="t-center">{{ $item->quantity }}</td>
-                    <td class="t-right">{{ number_format($item->unit_price, 2) }}</td>
-                    <td class="t-right">{{ number_format($item->subtotal, 2) }}</td>
+                    <td class="t-right">₱{{ number_format($item->unit_price, 2) }}</td>
+                    <td class="t-right">₱{{ number_format($item->subtotal, 2) }}</td>
                 </tr>
                 @empty
                 <tr>
@@ -172,19 +172,19 @@
             @endphp
             <tr>
                 <td class="t-right" style="width:78%;">Subtotal</td>
-                <td class="t-right" style="width:22%;">{{ number_format($subtotal, 2) }}</td>
+                <td class="t-right" style="width:22%;">₱{{ number_format($subtotal, 2) }}</td>
             </tr>
             <tr>
                 <td class="t-right">VAT (12%)</td>
-                <td class="t-right">{{ number_format($tax, 2) }}</td>
+                <td class="t-right">₱{{ number_format($tax, 2) }}</td>
             </tr>
             <tr>
                 <td class="t-right">Shipping Fee</td>
-                <td class="t-right">100.00</td>
+                <td class="t-right">₱100.00</td>
             </tr>
             <tr class="grand">
                 <td class="t-right">TOTAL AMOUNT</td>
-                <td class="t-right">{{ number_format($order->total_amount, 2) }}</td>
+                <td class="t-right">₱{{ number_format($order->total_amount, 2) }}</td>
             </tr>
         </table>
 
