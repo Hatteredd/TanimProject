@@ -1,54 +1,65 @@
 @extends('layouts.admin')
-@section('page-title')
-    <div style="display:flex;justify-content:space-between;align-items:center;width:100%;">
-        <span>📈 Reports & Analytics</span>
-        <button onclick="window.print()" class="btn-ghost" style="padding:0.5rem 1rem;font-size:0.8rem;border-radius:0.75rem;display:flex;align-items:center;gap:0.5rem;background:var(--bg-2);border:1px solid var(--border);">
-            <span>🖨️</span> Print Report
-        </button>
-    </div>
-@endsection
+@section('title','Reports')
+@section('page-title','📈 Reports & Analytics')
 
 @section('content')
 
+{{-- Print Button (Fixed Top Right) --}}
+<button onclick="window.print()" class="btn-ghost" style="position:fixed; top:1rem; right:1.5rem; z-index:1000; padding:0.6rem 1.2rem; font-size:0.85rem; border-radius:0.75rem; display:flex; align-items:center; gap:0.5rem; background:var(--primary); color:white; border:none; box-shadow:var(--shadow-card); font-weight:800;">
+    <span>🖨️</span> Print Report
+</button>
+
 <style>
 @media print {
-    /* Hide navigation and filters */
-    .sidebar, .nav-wrap, form, .btn-ghost, .btn-primary, .breadcrumb, .nav-logo {
+    /* Hide everything by default */
+    body * {
+        visibility: hidden;
+    }
+    
+    /* Only show the page content area */
+    .admin-main, .page-content, .page-content * {
+        visibility: visible;
+    }
+    
+    /* Position content at the very top of the printed page */
+    .admin-main {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    .page-content {
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    /* Hide UI elements that shouldn't be in the report */
+    .admin-sidebar, .admin-topbar, form, button, .btn-ghost, .btn-primary, .breadcrumb, .nav-logo, .sidebar-logo {
         display: none !important;
     }
     
-    /* Adjust main content layout */
-    .admin-main {
-        margin: 0 !important;
-        padding: 0 !important;
+    /* Style refinements for print */
+    body {
         background: white !important;
+        color: black !important;
     }
     
-    .page-wrap {
-        max-width: 100% !important;
-        padding: 0 !important;
-    }
-    
-    /* Make text black for readability */
-    body, .text, .pd-title, h1, h2, h3, h4, p, span, td, th {
-        color: #000 !important;
-    }
-    
-    /* Remove shadows and backgrounds for cleaner print */
     .glass, .page-card, .stat-card {
         background: white !important;
-        border: 1px solid #ddd !important;
+        border: 1px solid #eee !important;
         box-shadow: none !important;
+        color: black !important;
         break-inside: avoid;
     }
     
-    /* Ensure charts are visible */
-    canvas {
-        max-width: 100% !important;
-        height: auto !important;
+    h1, h2, h3, h4, p, span, td, th {
+        color: black !important;
     }
-    
-    /* Layout adjustments for printing */
+
+    /* Force grid items to be full width for vertical paper */
     div[style*="grid-template-columns"] {
         display: block !important;
     }
@@ -57,10 +68,10 @@
         margin-bottom: 2rem !important;
         width: 100% !important;
     }
-    
-    /* Force new page before large sections if needed */
-    .print-new-page {
-        page-break-before: always;
+
+    canvas {
+        max-width: 100% !important;
+        height: auto !important;
     }
 }
 </style>
