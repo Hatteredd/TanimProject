@@ -46,8 +46,8 @@
             @forelse($reviews as $review)
             <tr style="border-bottom:1px solid var(--border);">
                 <td class="td-cell">
-                    <p style="font-size:0.875rem;font-weight:700;color:var(--text);margin:0;">{{ $review->user->name }}</p>
-                    <p style="font-size:0.75rem;color:var(--text-muted);margin:0;">{{ $review->user->email }}</p>
+                    <p style="font-size:0.875rem;font-weight:700;color:var(--text);margin:0;">{{ $review->user->name ?? 'Deleted User' }}</p>
+                    <p style="font-size:0.75rem;color:var(--text-muted);margin:0;">{{ $review->user->email ?? 'N/A' }}</p>
                 </td>
                 <td class="td-cell">{{ $review->product->name }}</td>
                 <td class="td-cell" style="text-align:center;">

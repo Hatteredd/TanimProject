@@ -36,8 +36,8 @@
             <tr style="border-bottom:1px solid var(--border);">
                 <td style="padding:0.85rem 1rem;font-size:0.875rem;font-weight:700;color:var(--text);">{{ $order->order_number }}</td>
                 <td style="padding:0.85rem 1rem;">
-                    <p style="font-size:0.875rem;font-weight:600;color:var(--text);margin:0;">{{ $order->user->name }}</p>
-                    <p style="font-size:0.75rem;color:var(--text-muted);margin:0;">{{ $order->user->email }}</p>
+                    <p style="font-size:0.875rem;font-weight:600;color:var(--text);margin:0;">{{ $order->user->name ?? 'Deleted User' }}</p>
+                    <p style="font-size:0.75rem;color:var(--text-muted);margin:0;">{{ $order->user->email ?? 'N/A' }}</p>
                 </td>
                 <td style="padding:0.85rem 1rem;text-align:right;font-size:0.875rem;font-weight:700;color:var(--primary);">&#8369;{{ number_format($order->total_amount, 2) }}</td>
                 <td style="padding:0.85rem 1rem;text-align:center;">

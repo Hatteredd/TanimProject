@@ -36,7 +36,7 @@
                 <div style="display:flex;justify-content:space-between;align-items:center;padding:1rem;background:var(--bg-2);border-radius:1rem;border:1px solid var(--border);">
                     <div>
                         <p style="font-size:0.875rem;font-weight:800;color:var(--text);margin:0;">{{ $order->order_number }}</p>
-                        <p style="font-size:0.75rem;color:var(--text-muted);margin:0;">{{ $order->user->name }}</p>
+                        <p style="font-size:0.75rem;color:var(--text-muted);margin:0;">{{ $order->user->name ?? 'Deleted User' }}</p>
                     </div>
                     <div style="text-align:right;">
                         <p style="font-size:0.9rem;font-weight:900;color:var(--primary);margin:0;">₱{{ number_format($order->total_amount,2) }}</p>
