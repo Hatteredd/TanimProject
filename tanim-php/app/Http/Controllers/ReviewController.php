@@ -12,7 +12,7 @@ class ReviewController extends Controller
 {
     public function store(Request $request, Product $product)
     {
-        // Only buyers who purchased the product can review
+        //Only buyers who purchased the product can review
         $hasPurchased = Order::where('user_id', Auth::id())
             ->where('status', 'delivered')
             ->whereHas('items', fn($q) => $q->where('product_id', $product->id))

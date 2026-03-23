@@ -82,7 +82,7 @@ class ProductAdminController extends Controller
             $data['image'] = $request->file('image')->store('products', 'public');
         }
         $data['is_active'] = $request->boolean('is_active', true);
-        $data['user_id']   = Auth::id(); // admin owns all products
+        $data['user_id']   = Auth::id(); //Admin created products
 
         $product = Product::create($data);
 

@@ -21,20 +21,20 @@ use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\LogController;
 use App\Http\Controllers\Admin\DataController;
 
-// ── Public ──────────────────────────────────────────────────────────
+//Public
 Route::get('/', [ProductController::class, 'home'])->name('home');
 
 Route::get('/marketplace',        [ProductController::class, 'index'])->name('marketplace');
 Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
 
-// ── Auth ─────────────────────────────────────────────────────────────
+//Auth
 Route::get('/login',    [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login',   [AuthController::class, 'login']);
 Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
 Route::post('/register',[AuthController::class, 'register']);
 Route::post('/logout',  [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 
-// ── Email Verification ───────────────────────────────────────────────
+//Email Verification
 Route::middleware('auth')->group(function () {
     Route::get('/email/verify', fn() => view('auth.verify-email'))->name('verification.notice');
 
@@ -49,7 +49,7 @@ Route::middleware('auth')->group(function () {
     })->middleware('throttle:6,1')->name('verification.send');
 });
 
-// ── Authenticated (verified users) ───────────────────────────────────
+//Authenticated (verified users) 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
@@ -76,7 +76,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/reviews/{review}',          [ReviewController::class, 'destroy'])->name('reviews.destroy');
 });
 
-// ── Admin ─────────────────────────────────────────────────────────────
+//Admin
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
 
