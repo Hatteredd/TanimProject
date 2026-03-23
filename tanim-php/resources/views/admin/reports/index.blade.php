@@ -6,37 +6,56 @@
 
 <style>
 @media print {
-    /* 1. Hide everything by default */
-    html, body, .admin-shell, .admin-sidebar, .admin-topbar, .sidebar-bottom, .sidebar-nav, .nav-logo, .nav-group-label, .nav-item, .admin-breadcrumb, form, button, .btn-ghost, .btn-primary, .fixed-print-btn {
+    /* 1. Hide UI elements */
+    .admin-sidebar, 
+    .admin-topbar, 
+    .fixed-print-btn, 
+    form, 
+    .admin-breadcrumb, 
+    .btn-ghost, 
+    .btn-primary,
+    .nav-item,
+    .nav-group-label,
+    .sidebar-logo,
+    .sidebar-bottom {
         display: none !important;
-        visibility: hidden !important;
     }
 
-    /* 2. Show only the content we want */
-    html, body {
+    /* 2. Reset Layout for Print */
+    .admin-shell, .admin-main {
         display: block !important;
-        visibility: visible !important;
-        background: white !important;
-        color: black !important;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-
-    .admin-main, .page-content {
-        display: block !important;
-        visibility: visible !important;
-        position: static !important;
         width: 100% !important;
         margin: 0 !important;
         padding: 0 !important;
+        background: white !important;
     }
 
-    /* 3. Ensure all report sections are visible */
-    .page-content * {
-        visibility: visible !important;
+    .page-content {
+        display: block !important;
+        padding: 0 !important;
+        margin: 0 !important;
     }
 
-    /* 4. Layout: Force grid items to stack for vertical paper */
+    /* 3. Force white background & black text */
+    body, html {
+        background: white !important;
+        color: black !important;
+    }
+
+    /* 4. Format report containers */
+    .glass, .page-card, .stat-card, .page-wrap {
+        background: white !important;
+        border: 1px solid #eee !important;
+        box-shadow: none !important;
+        color: black !important;
+        margin-bottom: 1.5rem !important;
+        padding: 1.25rem !important;
+        break-inside: avoid;
+        display: block !important;
+        width: 100% !important;
+    }
+
+    /* 5. Force vertical stacking for all grids and flexboxes */
     div[style*="display:grid"], 
     div[style*="display: grid"],
     div[style*="display:flex"],
@@ -45,42 +64,35 @@
         width: 100% !important;
     }
 
-    /* Target specific report containers */
-    .stat-card, .glass, .page-card {
-        display: block !important;
+    div[style*="grid-template-columns"] > div,
+    div[style*="flex-direction:column"] > div {
         width: 100% !important;
-        margin-bottom: 2rem !important;
-        border: 1px solid #ddd !important;
-        background: #fff !important;
-        box-shadow: none !important;
-        page-break-inside: avoid;
-        padding: 1.5rem !important;
+        margin-bottom: 1.5rem !important;
     }
 
-    /* 5. Chart handling */
+    /* 6. Chart sizing */
     canvas {
-        width: 100% !important;
+        max-width: 100% !important;
         height: auto !important;
-        max-height: 400px !important;
         display: block !important;
-        margin: 1rem 0 !important;
-    }
-
-    /* 6. Typography */
-    h1, h2, h3, h4, p, span, td, th {
-        color: #000 !important;
     }
 
     /* 7. Professional Header */
     .admin-main::before {
-        content: "TANIM - Agricultural Marketplace Reports & Analytics";
+        content: "TANIM - Agricultural Marketplace Performance Report";
         display: block;
-        font-size: 1.75rem;
-        font-weight: 900;
+        font-size: 1.5rem;
+        font-weight: 800;
         text-align: center;
-        margin-bottom: 1rem;
+        margin-bottom: 2rem;
         padding-bottom: 1rem;
-        border-bottom: 3px solid #333;
+        border-bottom: 2px solid #000;
+        color: black !important;
+    }
+
+    /* 8. Text contrast */
+    h1, h2, h3, h4, p, span, td, th {
+        color: black !important;
     }
 }
 </style>
