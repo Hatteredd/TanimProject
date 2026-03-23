@@ -114,7 +114,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/orders/{order}/status',       [OrderAdminController::class, 'updateStatus'])->name('orders.update-status');
 
     // Reports & Analytics
-    Route::get('/reports',                      [ReportController::class, 'index'])->name('reports');
+    Route::get('/reports',                      [ReportController::class, 'index'])->name('reports.index');
+    Route::get('/reports/pdf',                  [ReportController::class, 'downloadPdf'])->name('reports.pdf');
 
     // Data Management
     Route::get('/data',                         [DataController::class, 'index'])->name('data.index');
@@ -134,7 +135,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::delete('/reviews/{review}',          [ReviewAdminController::class, 'destroy'])->name('reviews.destroy');
 
     // Expenses
-    Route::get('/expenses',              [ExpenseController::class, 'index'])->name('expenses');
+    Route::get('/expenses',              [ExpenseController::class, 'index'])->name('expenses.index');
     Route::post('/expenses',             [ExpenseController::class, 'store'])->name('expenses.store');
     Route::delete('/expenses/{expense}', [ExpenseController::class, 'destroy'])->name('expenses.destroy');
 
