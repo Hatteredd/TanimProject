@@ -4,105 +4,91 @@
 
 @section('content')
 
-{{-- Print Button (Fixed Top Right) --}}
-<button onclick="window.print()" class="btn-ghost" style="position:fixed; top:1rem; right:1.5rem; z-index:1000; padding:0.6rem 1.2rem; font-size:0.85rem; border-radius:0.75rem; display:flex; align-items:center; gap:0.5rem; background:var(--primary); color:white; border:none; box-shadow:var(--shadow-card); font-weight:800;">
-    <span>🖨️</span> Print Report
-</button>
-
 <style>
 @media print {
-    /* Specifically hide UI elements we don't want in the report */
-    .admin-sidebar, 
-    .admin-topbar, 
-    form, 
-    button, 
-    .btn-ghost, 
-    .btn-primary, 
-    .admin-breadcrumb, 
-    .sidebar-logo,
-    .nav-group-label,
-    .nav-item,
-    .sidebar-bottom,
-    style,
-    script {
+    /* 1. Hide everything by default */
+    html, body, .admin-shell, .admin-sidebar, .admin-topbar, .sidebar-bottom, .sidebar-nav, .nav-logo, .nav-group-label, .nav-item, .admin-breadcrumb, form, button, .btn-ghost, .btn-primary, .fixed-print-btn {
         display: none !important;
+        visibility: hidden !important;
     }
 
-    /* Layout adjustments for the printed page */
-    .admin-shell {
+    /* 2. Show only the content we want */
+    html, body {
         display: block !important;
+        visibility: visible !important;
+        background: white !important;
+        color: black !important;
+        margin: 0 !important;
+        padding: 0 !important;
     }
 
-    .admin-main {
+    .admin-main, .page-content {
+        display: block !important;
+        visibility: visible !important;
+        position: static !important;
         width: 100% !important;
         margin: 0 !important;
         padding: 0 !important;
-        background: white !important;
     }
 
-    .page-content {
-        padding: 0 !important;
-        margin: 0 !important;
-        display: block !important;
+    /* 3. Ensure all report sections are visible */
+    .page-content * {
+        visibility: visible !important;
     }
 
-    /* Fix background and text colors for white paper */
-    body {
-        background: white !important;
-        color: black !important;
-    }
-
-    .glass, .page-card, .stat-card {
-        background: white !important;
-        border: 1px solid #ddd !important;
-        box-shadow: none !important;
-        color: black !important;
-        margin-bottom: 1.5rem !important;
-        break-inside: avoid;
-        display: block !important;
-        padding: 1.5rem !important;
-    }
-
-    /* Force grids to stack vertically for printing */
+    /* 4. Layout: Force grid items to stack for vertical paper */
     div[style*="display:grid"], 
     div[style*="display: grid"],
     div[style*="display:flex"],
     div[style*="display: flex"] {
         display: block !important;
+        width: 100% !important;
     }
 
-    div[style*="grid-template-columns"] > div,
-    div[style*="flex-direction:column"] > div {
+    /* Target specific report containers */
+    .stat-card, .glass, .page-card {
+        display: block !important;
         width: 100% !important;
         margin-bottom: 2rem !important;
+        border: 1px solid #ddd !important;
+        background: #fff !important;
+        box-shadow: none !important;
+        page-break-inside: avoid;
+        padding: 1.5rem !important;
     }
 
-    /* Ensure charts (canvas) are captured and sized correctly */
+    /* 5. Chart handling */
     canvas {
-        max-width: 100% !important;
+        width: 100% !important;
         height: auto !important;
+        max-height: 400px !important;
         display: block !important;
         margin: 1rem 0 !important;
     }
 
-    /* Header styling for the printed report */
+    /* 6. Typography */
     h1, h2, h3, h4, p, span, td, th {
-        color: black !important;
+        color: #000 !important;
     }
 
-    /* Add a title to the printed report */
+    /* 7. Professional Header */
     .admin-main::before {
-        content: "Tanim Agricultural Marketplace - Business Intelligence Report";
+        content: "TANIM - Agricultural Marketplace Reports & Analytics";
         display: block;
-        font-size: 1.5rem;
-        font-weight: 800;
+        font-size: 1.75rem;
+        font-weight: 900;
         text-align: center;
-        margin-bottom: 2rem;
+        margin-bottom: 1rem;
         padding-bottom: 1rem;
-        border-bottom: 2px solid #333;
+        border-bottom: 3px solid #333;
     }
 }
 </style>
+
+{{-- Print Button (Fixed Top Right) --}}
+<button onclick="window.print()" class="btn-ghost fixed-print-btn" style="position:fixed; top:1rem; right:1.5rem; z-index:1000; padding:0.6rem 1.2rem; font-size:0.85rem; border-radius:0.75rem; display:flex; align-items:center; gap:0.5rem; background:var(--primary); color:white; border:none; box-shadow:var(--shadow-card); font-weight:800;">
+    <span>🖨️</span> Print Report
+</button>
 
 {{-- Chart.js CDN --}}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
