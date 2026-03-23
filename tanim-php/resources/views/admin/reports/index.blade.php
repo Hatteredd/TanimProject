@@ -11,12 +11,6 @@
 
 <style>
 @media print {
-    /* Reset visibility for everything in the admin shell */
-    .admin-shell, .admin-main, .page-content, .page-content * {
-        visibility: visible !important;
-        display: block !important;
-    }
-
     /* Specifically hide UI elements we don't want in the report */
     .admin-sidebar, 
     .admin-topbar, 
@@ -24,13 +18,14 @@
     button, 
     .btn-ghost, 
     .btn-primary, 
-    .breadcrumb, 
+    .admin-breadcrumb, 
     .sidebar-logo,
     .nav-group-label,
     .nav-item,
-    .sidebar-bottom {
+    .sidebar-bottom,
+    style,
+    script {
         display: none !important;
-        visibility: hidden !important;
     }
 
     /* Layout adjustments for the printed page */
@@ -42,11 +37,13 @@
         width: 100% !important;
         margin: 0 !important;
         padding: 0 !important;
+        background: white !important;
     }
 
     .page-content {
         padding: 0 !important;
         margin: 0 !important;
+        display: block !important;
     }
 
     /* Fix background and text colors for white paper */
@@ -57,7 +54,7 @@
 
     .glass, .page-card, .stat-card {
         background: white !important;
-        border: 1px solid #eee !important;
+        border: 1px solid #ddd !important;
         box-shadow: none !important;
         color: black !important;
         margin-bottom: 1.5rem !important;
@@ -68,6 +65,8 @@
 
     /* Force grids to stack vertically for printing */
     div[style*="display:grid"], 
+    div[style*="display: grid"],
+    div[style*="display:flex"],
     div[style*="display: flex"] {
         display: block !important;
     }
