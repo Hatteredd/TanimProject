@@ -11,67 +11,96 @@
 
 <style>
 @media print {
-    /* Hide everything by default */
-    body * {
-        visibility: hidden;
+    /* Reset visibility for everything in the admin shell */
+    .admin-shell, .admin-main, .page-content, .page-content * {
+        visibility: visible !important;
+        display: block !important;
     }
-    
-    /* Only show the page content area */
-    .admin-main, .page-content, .page-content * {
-        visibility: visible;
+
+    /* Specifically hide UI elements we don't want in the report */
+    .admin-sidebar, 
+    .admin-topbar, 
+    form, 
+    button, 
+    .btn-ghost, 
+    .btn-primary, 
+    .breadcrumb, 
+    .sidebar-logo,
+    .nav-group-label,
+    .nav-item,
+    .sidebar-bottom {
+        display: none !important;
+        visibility: hidden !important;
     }
-    
-    /* Position content at the very top of the printed page */
+
+    /* Layout adjustments for the printed page */
+    .admin-shell {
+        display: block !important;
+    }
+
     .admin-main {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
+        width: 100% !important;
         margin: 0 !important;
         padding: 0 !important;
     }
-    
+
     .page-content {
         padding: 0 !important;
         margin: 0 !important;
     }
 
-    /* Hide UI elements that shouldn't be in the report */
-    .admin-sidebar, .admin-topbar, form, button, .btn-ghost, .btn-primary, .breadcrumb, .nav-logo, .sidebar-logo {
-        display: none !important;
-    }
-    
-    /* Style refinements for print */
+    /* Fix background and text colors for white paper */
     body {
         background: white !important;
         color: black !important;
     }
-    
+
     .glass, .page-card, .stat-card {
         background: white !important;
         border: 1px solid #eee !important;
         box-shadow: none !important;
         color: black !important;
+        margin-bottom: 1.5rem !important;
         break-inside: avoid;
+        display: block !important;
+        padding: 1.5rem !important;
     }
-    
+
+    /* Force grids to stack vertically for printing */
+    div[style*="display:grid"], 
+    div[style*="display: flex"] {
+        display: block !important;
+    }
+
+    div[style*="grid-template-columns"] > div,
+    div[style*="flex-direction:column"] > div {
+        width: 100% !important;
+        margin-bottom: 2rem !important;
+    }
+
+    /* Ensure charts (canvas) are captured and sized correctly */
+    canvas {
+        max-width: 100% !important;
+        height: auto !important;
+        display: block !important;
+        margin: 1rem 0 !important;
+    }
+
+    /* Header styling for the printed report */
     h1, h2, h3, h4, p, span, td, th {
         color: black !important;
     }
 
-    /* Force grid items to be full width for vertical paper */
-    div[style*="grid-template-columns"] {
-        display: block !important;
-    }
-    
-    div[style*="grid-template-columns"] > div {
-        margin-bottom: 2rem !important;
-        width: 100% !important;
-    }
-
-    canvas {
-        max-width: 100% !important;
-        height: auto !important;
+    /* Add a title to the printed report */
+    .admin-main::before {
+        content: "Tanim Agricultural Marketplace - Business Intelligence Report";
+        display: block;
+        font-size: 1.5rem;
+        font-weight: 800;
+        text-align: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #333;
     }
 }
 </style>
