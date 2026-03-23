@@ -72,15 +72,15 @@
 {{-- Summary KPIs --}}
 <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;margin-bottom:2rem;">
 @foreach([
-    ['Total Revenue','₱'.number_format($totalRevenue,2),'var(--primary)','💰'],
+    ['Total Revenue','&#8369;'.number_format($totalRevenue,2),'var(--primary)','💰'],
     ['Total Orders',$totalOrders,'var(--sky)','📦'],
     ['Customers',$totalCustomers,'var(--earth)','👤'],
-    ['Avg Order Value','₱'.number_format($avgOrderValue,2),'var(--wheat-2)','📊'],
+    ['Avg Order Value','&#8369;'.number_format($avgOrderValue,2),'var(--wheat-2)','📊'],
 ] as [$label,$val,$color,$icon])
 <div class="stat-card">
     <span style="font-size:1.4rem;display:block;margin-bottom:.4rem;">{{ $icon }}</span>
     <p style="font-size:.68rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin:0 0 .2rem;">{{ $label }}</p>
-    <p style="font-size:1.15rem;font-weight:900;color:{{ $color }};font-family:'Outfit',sans-serif;margin:0;">{{ $val }}</p>
+    <p style="font-size:1.15rem;font-weight:900;color:{{ $color }};font-family:'Outfit',sans-serif;margin:0;">{!! $val !!}</p>
 </div>
 @endforeach
 </div>
@@ -91,7 +91,7 @@
     <div class="glass" style="border-radius:1.25rem;padding:1.25rem;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
             <h2 style="font-family:'Outfit',sans-serif;font-size:.95rem;font-weight:800;color:var(--text);margin:0;">📅 Sales Trend — {{ $fromDate->format('M d, Y') }} to {{ $toDate->format('M d, Y') }}</h2>
-            <span style="font-size:.72rem;font-weight:700;color:var(--primary);">₱{{ number_format($totalRevenue,0) }} total</span>
+            <span style="font-size:.72rem;font-weight:700;color:var(--primary);">&#8369;{{ number_format($totalRevenue,0) }} total</span>
         </div>
         <canvas id="monthlySalesChart" height="220"></canvas>
     </div>
@@ -208,7 +208,7 @@
     new Chart(document.getElementById('monthlySalesChart'), {
         type: 'line',
         data: { labels: months, datasets: [
-            { label:'Revenue (₱)', data:salesTotals, borderColor:'#4ade80',
+            { label:'Revenue (\u20B1)', data:salesTotals, borderColor:'#4ade80',
               backgroundColor:'rgba(74,222,128,0.15)', borderWidth:2.5,
               pointBackgroundColor:'#4ade80', pointRadius:4, tension:0.4, fill:true },
             { label:'Orders', data:salesCounts, borderColor:'#38bdf8',
@@ -226,7 +226,7 @@
                         label:function(ctx){
                             let l = ctx.dataset.label || '';
                             if(l) l += ': ';
-                            if(ctx.datasetIndex === 0) l += '₱'+ctx.parsed.y.toLocaleString();
+                            if(ctx.datasetIndex === 0) l += '\u20B1'+ctx.parsed.y.toLocaleString();
                             else l += ctx.parsed.y.toLocaleString();
                             return l;
                         }
@@ -235,7 +235,7 @@
             },
             scales:{
                 x:{grid:{color:gridColor}},
-                y:{grid:{color:gridColor}, ticks:{callback:v=>'₱'+v.toLocaleString()}},
+                y:{grid:{color:gridColor}, ticks:{callback:v=>'\u20B1'+v.toLocaleString()}},
                 y2:{position:'right', grid:{drawOnChartArea:false}, ticks:{stepSize:1}},
             }
         }
@@ -260,7 +260,7 @@
     new Chart(document.getElementById('topProductsChart'), {
         type: 'bar',
         data: { labels:topLabels, datasets:[{
-            label:'Revenue (₱)', data:topTotals, borderRadius:5,
+            label:'Revenue (\u20B1)', data:topTotals, borderRadius:5,
             backgroundColor:['rgba(74,222,128,.75)','rgba(56,189,248,.75)','rgba(161,110,60,.75)',
                 'rgba(250,204,21,.75)','rgba(167,139,250,.75)','rgba(251,146,60,.75)',
                 'rgba(34,197,94,.75)','rgba(14,165,233,.75)','rgba(239,68,68,.75)','rgba(99,102,241,.75)'],
@@ -268,9 +268,9 @@
         options:{
             indexAxis:'y', responsive:true,
             plugins:{ legend:{display:false},
-                tooltip:{...tip(), callbacks:{label:ctx=>' ₱'+ctx.parsed.x.toLocaleString()}} },
+                tooltip:{...tip(), callbacks:{label:ctx=>' \u20B1'+ctx.parsed.x.toLocaleString()}} },
             scales:{
-                x:{grid:{color:gridColor}, ticks:{callback:v=>'₱'+v.toLocaleString()}},
+                x:{grid:{color:gridColor}, ticks:{callback:v=>'\u20B1'+v.toLocaleString()}},
                 y:{grid:{color:gridColor}}
             }
         }
@@ -293,17 +293,17 @@
     new Chart(document.getElementById('categoryChart'), {
         type: 'bar',
         data: { labels:catLabels, datasets:[{
-            label:'Revenue (₱)', data:catTotals,
+            label:'Revenue (\u20B1)', data:catTotals,
             backgroundColor:'rgba(74,222,128,0.75)', borderColor:'#4ade80',
             borderWidth:1.5, borderRadius:6
         }]},
         options:{
             responsive:true,
             plugins:{ legend:{display:false},
-                tooltip:{...tip(), callbacks:{label:ctx=>' ₱'+ctx.parsed.y.toLocaleString()}} },
+                tooltip:{...tip(), callbacks:{label:ctx=>' \u20B1'+ctx.parsed.y.toLocaleString()}} },
             scales:{
                 x:{grid:{color:gridColor}},
-                y:{grid:{color:gridColor}, ticks:{callback:v=>'₱'+v.toLocaleString()}}
+                y:{grid:{color:gridColor}, ticks:{callback:v=>'\u20B1'+v.toLocaleString()}}
             }
         }
     });
