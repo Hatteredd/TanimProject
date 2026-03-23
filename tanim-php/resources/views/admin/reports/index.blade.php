@@ -218,7 +218,21 @@
         ]},
         options: {
             responsive:true, interaction:{mode:'index',intersect:false},
-            plugins:{ legend:{position:'bottom',labels:{boxWidth:12,padding:12}}, tooltip:tip() },
+            plugins:{ 
+                legend:{position:'bottom',labels:{boxWidth:12,padding:12}}, 
+                tooltip:{
+                    ...tip(),
+                    callbacks:{
+                        label:function(ctx){
+                            let l = ctx.dataset.label || '';
+                            if(l) l += ': ';
+                            if(ctx.datasetIndex === 0) l += '₱'+ctx.parsed.y.toLocaleString();
+                            else l += ctx.parsed.y.toLocaleString();
+                            return l;
+                        }
+                    }
+                } 
+            },
             scales:{
                 x:{grid:{color:gridColor}},
                 y:{grid:{color:gridColor}, ticks:{callback:v=>'₱'+v.toLocaleString()}},
