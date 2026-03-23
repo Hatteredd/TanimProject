@@ -108,6 +108,16 @@ class ReportController extends Controller
             ELSE ((SELECT COALESCE(SUM(oi.unit_price * oi.quantity), 0) FROM order_items oi WHERE oi.order_id = orders.id) * " . (1 + Order::VAT_RATE) . " + " . Order::SHIPPING_FEE . ")
         END";
 
+        // Pre-aggregate order item totals to keep grouped sales queries compatible with ONLY_FULL_GROUP_BY.
+        $orderItemTotalsSub = DB::table('order_items as oi')
+            ->selectRaw('oi.order_id, COALESCE(SUM(oi.unit_price * oi.quantity), 0) as items_total')
+            ->groupBy('oi.order_id');
+
+        $effectiveTotalGroupedSql = "CASE
+            WHEN orders.total_amount IS NOT NULL AND orders.total_amount > 0 THEN orders.total_amount
+            ELSE (COALESCE(oi_totals.items_total, 0) * " . (1 + Order::VAT_RATE) . " + " . Order::SHIPPING_FEE . ")
+        END";
+
         if ($statusFilter) {
             $ordersBase->where('orders.status', $statusFilter);
         }
@@ -123,8 +133,11 @@ class ReportController extends Controller
         }
 
         $salesQuery = Order::query()
+            ->leftJoinSub($orderItemTotalsSub, 'oi_totals', function ($join) {
+                $join->on('oi_totals.order_id', '=', 'orders.id');
+            })
             ->whereBetween('orders.created_at', [$fromDate, $toDate])
-            ->selectRaw("{$periodExpr} as period, COALESCE(SUM({$effectiveTotalSql}), 0) as total, COUNT(*) as count")
+            ->selectRaw("{$periodExpr} as period, COALESCE(SUM({$effectiveTotalGroupedSql}), 0) as total, COUNT(*) as count")
             ->groupBy('period')
             ->orderBy('period');
 
