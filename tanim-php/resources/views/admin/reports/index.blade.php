@@ -65,7 +65,7 @@
 
     <div style="display:flex;gap:.5rem;">
         <button type="submit" class="btn-primary" style="padding:.62rem 1rem;font-size:.85rem;border-radius:.75rem;">Apply Filters</button>
-        <a href="{{ route('admin.reports') }}" class="btn-primary" style="padding:.62rem 1rem;font-size:.85rem;border-radius:.75rem;text-decoration:none;background:var(--bg);color:var(--text-muted);border:1px solid var(--border);">Reset</a>
+        <a href="{{ route('admin.reports.index') }}" class="btn-primary" style="padding:.62rem 1rem;font-size:.85rem;border-radius:.75rem;text-decoration:none;background:var(--bg);color:var(--text-muted);border:1px solid var(--border);">Reset</a>
     </div>
 </form>
 

@@ -63,7 +63,7 @@
     <div class="glass" style="border-radius:1.25rem;padding:1.5rem;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;flex-wrap:wrap;gap:.75rem;">
             <h2 style="font-family:'Outfit';font-size:1rem;font-weight:800;color:var(--text);margin:0;">Expense History</h2>
-            <form method="GET" action="{{ route('admin.expenses') }}" style="display:flex;gap:.5rem;flex-wrap:wrap;">
+            <form method="GET" action="{{ route('admin.expenses.index') }}" style="display:flex;gap:.5rem;flex-wrap:wrap;">
                 <select name="type" class="input" style="width:auto;padding:.4rem .75rem;">
                     <option value="">All Types</option>
                     @foreach($types as $val => $label)<option value="{{ $val }}" {{ request('type')==$val?'selected':'' }}>{{ $label }}</option>@endforeach

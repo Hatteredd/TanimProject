@@ -7,12 +7,12 @@
     {{-- KPI Grid --}}
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1.5rem;margin-bottom:2.5rem;">
         @foreach([
-            ['Total Revenue','₱'.number_format($totalRevenue,2),'var(--primary)','💰',route('admin.reports')],
+            ['Total Revenue','₱'.number_format($totalRevenue,2),'var(--primary)','💰',route('admin.reports.index')],
             ['Total Orders',\App\Models\Order::count(),'var(--sky)','📦',route('admin.orders.index')],
             ['Customers',$totalCustomers,'var(--earth)','👤',route('admin.users.index')],
             ['Active Products',$totalProducts,'var(--primary-2)','🌾',route('admin.products.index')],
             ['Reviews',$totalReviews,'var(--accent)','⭐',route('admin.reviews.index')],
-            ['Avg Rating',$avgRating.'/5','var(--wheat)','🏆',route('admin.reports')],
+            ['Avg Rating',$avgRating.'/5','var(--wheat)','🏆',route('admin.reports.index')],
         ] as [$label,$val,$color,$icon,$link])
         <a href="{{ $link }}" style="text-decoration:none;">
             <div class="page-card animate-fade-in" style="padding:1.5rem;cursor:pointer;transition:all var(--transition-base);position:relative;overflow:hidden;animation-delay: {{ $loop->index * 50 }}ms">
@@ -95,7 +95,7 @@
         <div class="page-card animate-fade-in" style="padding:1.5rem;animation-delay:600ms;">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
                 <h2 style="font-family:'Outfit',sans-serif;font-size:1.1rem;font-weight:800;color:var(--text);margin:0;">💰 Expenses This Month</h2>
-                <a href="{{ route('admin.expenses') }}" class="btn-ghost" style="padding:0.4rem 0.8rem;font-size:0.75rem;">View All</a>
+                <a href="{{ route('admin.expenses.index') }}" class="btn-ghost" style="padding:0.4rem 0.8rem;font-size:0.75rem;">View All</a>
             </div>
             @php $types = \App\Models\Expense::types(); $total = array_sum($expenseByType->toArray()) ?: 1; @endphp
             <div style="display:flex;flex-direction:column;gap:1.25rem;">
