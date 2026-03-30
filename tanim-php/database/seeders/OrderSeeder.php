@@ -35,7 +35,6 @@ class OrderSeeder extends Seeder
                 $order = Order::create([
                     'user_id' => $buyer->id,
                     'order_number' => 'ORD-' . strtoupper(uniqid()),
-                    'total_amount' => 0, // Will be calculated
                     'status' => $status,
                     'shipping_address' => $this->generateRandomAddress(),
                     'contact_number' => $this->generateRandomContactNumber(),
@@ -46,14 +45,9 @@ class OrderSeeder extends Seeder
 
                 // Add 2-5 random products to each order
                 $selectedProducts = $products->random(rand(2, 5));
-                $totalAmount = 0;
-                
                 foreach ($selectedProducts as $product) {
                     $quantity = rand(1, 5);
                     $unitPrice = $product->price;
-                    $itemTotal = $unitPrice * $quantity;
-                    $totalAmount += $itemTotal;
-                    
                     OrderItem::create([
                         'order_id' => $order->id,
                         'product_id' => $product->id,
@@ -64,9 +58,6 @@ class OrderSeeder extends Seeder
                         'updated_at' => $orderDate,
                     ]);
                 }
-                
-                // Update order total
-                $order->update(['total_amount' => $totalAmount]);
             }
         }
         

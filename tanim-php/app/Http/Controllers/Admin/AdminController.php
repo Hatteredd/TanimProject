@@ -18,15 +18,11 @@ class AdminController extends Controller
         $totalReviews   = Review::count();
         $avgRating      = round(Review::avg('rating') ?? 0, 1);
 
-        $effectiveTotalSql = "CASE
-            WHEN orders.total_amount IS NOT NULL AND orders.total_amount > 0 THEN orders.total_amount
-            ELSE ((SELECT COALESCE(SUM(oi.unit_price * oi.quantity), 0) FROM order_items oi WHERE oi.order_id = orders.id) * " . (1 + Order::VAT_RATE) . " + " . Order::SHIPPING_FEE . ")
-        END";
 
-        $totalRevenue = (float) (Order::query()
-            ->whereNotIn('orders.status', ['cancelled'])
-            ->selectRaw("COALESCE(SUM({$effectiveTotalSql}), 0) as total")
-            ->value('total') ?? 0);
+            $totalRevenue = (float) (Order::query()
+                ->whereNotIn('orders.status', ['cancelled'])
+                ->get()
+                ->sum(fn($order) => $order->total_amount));
 
         $expensesThisMonth = Expense::whereMonth('expense_date', now()->month)
             ->whereYear('expense_date', now()->year)

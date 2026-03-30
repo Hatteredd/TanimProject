@@ -61,27 +61,19 @@ class OrderAdminController extends Controller
 
     public function charts()
     {
-        $effectiveTotalSql = "CASE
-            WHEN orders.total_amount IS NOT NULL AND orders.total_amount > 0 THEN orders.total_amount
-            ELSE ((SELECT COALESCE(SUM(oi.unit_price * oi.quantity), 0) FROM order_items oi WHERE oi.order_id = orders.id) * " . (1 + Order::VAT_RATE) . " + " . Order::SHIPPING_FEE . ")
-        END";
-
-        // Yearly sales by month
-        $yearlySales = Order::query()
+        // Yearly sales by month (computed)
+        $orders = Order::query()
             ->whereYear('orders.created_at', now()->year)
             ->whereNotIn('orders.status', ['cancelled'])
-            ->selectRaw("MONTH(orders.created_at) as month, COALESCE(SUM({$effectiveTotalSql}), 0) as total, COUNT(*) as count")
-            ->groupBy('month')
-            ->orderBy('month')
-            ->get()
-            ->keyBy('month');
+            ->get();
 
         $monthlyData = [];
         for ($m = 1; $m <= 12; $m++) {
+            $ordersForMonth = $orders->filter(fn($order) => $order->created_at->month === $m);
             $monthlyData[] = [
                 'month' => date('M', mktime(0, 0, 0, $m, 1)),
-                'total' => (float) ($yearlySales[$m]->total ?? 0),
-                'count' => (int) ($yearlySales[$m]->count ?? 0),
+                'total' => $ordersForMonth->sum(fn($order) => $order->total_amount),
+                'count' => $ordersForMonth->count(),
             ];
         }
 
@@ -100,18 +92,20 @@ class OrderAdminController extends Controller
         $from = $request->input('from', now()->startOfMonth()->toDateString());
         $to   = $request->input('to', now()->toDateString());
 
-        $effectiveTotalSql = "CASE
-            WHEN orders.total_amount IS NOT NULL AND orders.total_amount > 0 THEN orders.total_amount
-            ELSE ((SELECT COALESCE(SUM(oi.unit_price * oi.quantity), 0) FROM order_items oi WHERE oi.order_id = orders.id) * " . (1 + Order::VAT_RATE) . " + " . Order::SHIPPING_FEE . ")
-        END";
-
-        $sales = Order::query()
+        $orders = Order::query()
             ->whereBetween('orders.created_at', [$from . ' 00:00:00', $to . ' 23:59:59'])
             ->whereNotIn('orders.status', ['cancelled'])
-            ->selectRaw("DATE(orders.created_at) as date, COALESCE(SUM({$effectiveTotalSql}), 0) as total, COUNT(*) as count")
-            ->groupBy('date')
-            ->orderBy('date')
             ->get();
+
+        $sales = $orders->groupBy(fn($order) => $order->created_at->toDateString())
+            ->map(function ($ordersForDate, $date) {
+                return [
+                    'date' => $date,
+                    'total' => $ordersForDate->sum(fn($order) => $order->total_amount),
+                    'count' => $ordersForDate->count(),
+                ];
+            })
+            ->values();
 
         return response()->json($sales);
     }

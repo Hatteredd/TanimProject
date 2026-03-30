@@ -80,95 +80,24 @@ class ReportController extends Controller
             ? $request->input('category')
             : null;
 
-        $driver = DB::connection()->getDriverName();
-        $rangeDays = $fromDate->diffInDays($toDate);
-        $groupByMonthly = $rangeDays > 62;
-
-        $periodExpr = $driver === 'sqlite'
-            ? ($groupByMonthly
-                ? "strftime('%Y-%m', orders.created_at)"
-                : "strftime('%Y-%m-%d', orders.created_at)")
-            : ($groupByMonthly
-                ? "DATE_FORMAT(orders.created_at, '%Y-%m')"
-                : 'DATE(orders.created_at)');
-
-        $userPeriodExpr = $driver === 'sqlite'
-            ? ($groupByMonthly
-                ? "strftime('%Y-%m', users.created_at)"
-                : "strftime('%Y-%m-%d', users.created_at)")
-            : ($groupByMonthly
-                ? "DATE_FORMAT(users.created_at, '%Y-%m')"
-                : 'DATE(users.created_at)');
-
-        $ordersBase = Order::query()
-            ->whereBetween('orders.created_at', [$fromDate, $toDate]);
-
-        $effectiveTotalSql = "CASE
-            WHEN orders.total_amount IS NOT NULL AND orders.total_amount > 0 THEN orders.total_amount
-            ELSE ((SELECT COALESCE(SUM(oi.unit_price * oi.quantity), 0) FROM order_items oi WHERE oi.order_id = orders.id) * " . (1 + Order::VAT_RATE) . " + " . Order::SHIPPING_FEE . ")
-        END";
-
-        // Pre-aggregate order item totals to keep grouped sales queries compatible with ONLY_FULL_GROUP_BY.
-        $orderItemTotalsSub = DB::table('order_items as oi')
-            ->selectRaw('oi.order_id, COALESCE(SUM(oi.unit_price * oi.quantity), 0) as items_total')
-            ->groupBy('oi.order_id');
-
-        $effectiveTotalGroupedSql = "CASE
-            WHEN orders.total_amount IS NOT NULL AND orders.total_amount > 0 THEN orders.total_amount
-            ELSE (COALESCE(oi_totals.items_total, 0) * " . (1 + Order::VAT_RATE) . " + " . Order::SHIPPING_FEE . ")
-        END";
-
-        if ($statusFilter) {
-            $ordersBase->where('orders.status', $statusFilter);
-        }
-
-        if ($categoryFilter) {
-            $ordersBase->whereExists(function ($q) use ($categoryFilter) {
-                $q->selectRaw('1')
-                    ->from('order_items as oi')
-                    ->join('products as p', 'oi.product_id', '=', 'p.id')
-                    ->whereColumn('oi.order_id', 'orders.id')
-                    ->where('p.category', $categoryFilter);
-            });
-        }
-
-        $salesQuery = Order::query()
-            ->leftJoinSub($orderItemTotalsSub, 'oi_totals', function ($join) {
-                $join->on('oi_totals.order_id', '=', 'orders.id');
-            })
+        // Get all orders in range
+        $orders = Order::query()
             ->whereBetween('orders.created_at', [$fromDate, $toDate])
-            ->selectRaw("{$periodExpr} as period, COALESCE(SUM({$effectiveTotalGroupedSql}), 0) as total, COUNT(*) as count")
-            ->groupBy('period')
-            ->orderBy('period');
+            ->when($statusFilter, fn($q) => $q->where('status', $statusFilter))
+            ->get();
 
-        if ($statusFilter) {
-            $salesQuery->where('orders.status', $statusFilter);
-        } else {
-            $salesQuery->whereNotIn('orders.status', ['cancelled']);
-        }
-
-        if ($categoryFilter) {
-            $salesQuery->whereExists(function ($q) use ($categoryFilter) {
-                $q->selectRaw('1')
-                    ->from('order_items as oi')
-                    ->join('products as p', 'oi.product_id', '=', 'p.id')
-                    ->whereColumn('oi.order_id', 'orders.id')
-                    ->where('p.category', $categoryFilter);
-            });
-        }
-
-        $salesBuckets = $salesQuery->get()->keyBy('period');
-        $periodKeys = $this->buildPeriodKeys($fromDate, $toDate, $groupByMonthly);
-
-        $monthlyData = collect($periodKeys)->map(function (string $period) use ($salesBuckets, $groupByMonthly) {
-            $row = $salesBuckets->get($period);
-
-            return [
-                'month' => $this->formatPeriodLabel($period, $groupByMonthly),
-                'total' => (float) ($row->total ?? 0),
-                'count' => (int) ($row->count ?? 0),
-            ];
-        })->values()->all();
+        // Compute totals by period
+        $groupByMonthly = $fromDate->diffInDays($toDate) > 62;
+        $periodKey = $groupByMonthly ? fn($order) => $order->created_at->format('Y-m') : fn($order) => $order->created_at->toDateString();
+        $salesByPeriod = $orders->groupBy($periodKey)
+            ->map(function ($ordersForPeriod, $period) {
+                return [
+                    'period' => $period,
+                    'total' => $ordersForPeriod->sum(fn($order) => $order->total_amount),
+                    'count' => $ordersForPeriod->count(),
+                ];
+            })
+            ->values();
 
         $topProducts = OrderItem::query()
             ->join('orders', 'order_items.order_id', '=', 'orders.id')

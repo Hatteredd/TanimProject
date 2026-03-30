@@ -94,35 +94,24 @@ class OrderController extends Controller
                     'shipping_address' => $validated['shipping_address'],
                     'contact_number'   => $validated['contact_number'],
                     'notes'            => $validated['notes'] ?? null,
-                    'total_amount'     => $totalAmount,
+                    // 'total_amount'     => $totalAmount, // removed, now computed
                 ];
 
-                if (Schema::hasColumn('orders', 'payment_method')) {
+                if (\Schema::hasColumn('orders', 'payment_method')) {
                     $orderPayload['payment_method'] = $validated['payment_method'];
                 }
 
                 $order = Order::create($orderPayload);
 
                 foreach ($cartItems as $item) {
-                    $product = $item->product()->lockForUpdate()->first();
-                    $productName = $item->product?->name ?? 'a selected item';
-
-                    if (!$product || !$product->is_active || $product->stock < $item->quantity) {
-                        throw new RuntimeException("Insufficient stock for {$productName}.");
-                    }
-
                     OrderItem::create([
-                        'order_id'     => $order->id,
-                        'product_id'   => $product->id,
-                        'product_name' => $product->name,
-                        'unit_price'   => $product->price,
-                        'quantity'     => $item->quantity,
+                        'order_id'    => $order->id,
+                        'product_id'  => $item->product_id,
+                        'product_name'=> $item->product->name,
+                        'quantity'    => $item->quantity,
+                        'unit_price'  => $item->product->price,
                     ]);
-
-                    $product->decrement('stock', $item->quantity);
                 }
-
-                CartItem::where('user_id', Auth::id())->delete();
 
                 return $order;
             });

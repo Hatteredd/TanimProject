@@ -35,7 +35,7 @@ class DataController extends Controller
                     'id' => $order->id,
                     'order_number' => $order->order_number,
                     'status' => $order->status,
-                    'total_amount' => $order->total_amount,
+                    'total_amount' => $order->total_amount, // now computed
                     'user_id' => $order->user_id,
                     'user_name' => $order->user?->name,
                     'user_email' => $order->user?->email,
