@@ -89,6 +89,20 @@ class ReportController extends Controller
         // Compute totals by period
         $groupByMonthly = $fromDate->diffInDays($toDate) > 62;
         $periodKey = $groupByMonthly ? fn($order) => $order->created_at->format('Y-m') : fn($order) => $order->created_at->toDateString();
+        $periodExpr = DB::connection()->getDriverName() === 'sqlite'
+            ? ($groupByMonthly
+                ? "strftime('%Y-%m', orders.created_at)"
+                : "strftime('%Y-%m-%d', orders.created_at)")
+            : ($groupByMonthly
+                ? "DATE_FORMAT(orders.created_at, '%Y-%m')"
+                : 'DATE(orders.created_at)');
+        $userPeriodExpr = DB::connection()->getDriverName() === 'sqlite'
+            ? ($groupByMonthly
+                ? "strftime('%Y-%m', users.created_at)"
+                : "strftime('%Y-%m-%d', users.created_at)")
+            : ($groupByMonthly
+                ? "DATE_FORMAT(users.created_at, '%Y-%m')"
+                : 'DATE(users.created_at)');
         $salesByPeriod = $orders->groupBy($periodKey)
             ->map(function ($ordersForPeriod, $period) {
                 return [
@@ -118,6 +132,8 @@ class ReportController extends Controller
             ->orderBy('period')
             ->get()
             ->keyBy('period');
+
+        $periodKeys = $this->buildPeriodKeys($fromDate, $toDate, $groupByMonthly);
 
         $userRegData = collect($periodKeys)->map(function (string $period) use ($userRegs, $groupByMonthly) {
             $row = $userRegs->get($period);
